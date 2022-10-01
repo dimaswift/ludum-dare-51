@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bbd8e33e00e4550b565ffaa583e57ad, type: 3}
   m_Name: TestGun
   m_EditorClassIdentifier: 
-  fireRate: 0.5
-  damage: 1
-  projectileSpeed: 25
+  fireRate: 0.1
+  damage: 0.1
+  projectileSpeed: 40
   projectile: {fileID: 7977768274499272216, guid: 49076a9c474fb1542aa3219ef768c9ee,
     type: 3}

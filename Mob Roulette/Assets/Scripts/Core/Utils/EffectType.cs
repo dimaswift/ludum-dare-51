@@ -3,6 +3,7 @@
     public enum EffectType
     {
         Spark,
-        Smoke
+        Smoke,
+        Explosion
     }
 }

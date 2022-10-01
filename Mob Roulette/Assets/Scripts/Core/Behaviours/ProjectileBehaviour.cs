@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using MobRoulette.Core.Domain;
+﻿using MobRoulette.Core.Domain;
 using MobRoulette.Core.Interfaces;
 using MobRoulette.Core.Utils;
 using UnityEngine;
@@ -9,6 +8,7 @@ namespace MobRoulette.Core.Behaviours
     public class ProjectileBehaviour : MonoBehaviour, IProjectile
     {
         public Color HitColor => hitColor;
+        public float Damage { get; set; }
         public Rigidbody2D Body => body;
         public int PrefabId { get; set; }
         
@@ -53,15 +53,21 @@ namespace MobRoulette.Core.Behaviours
             lastBounceTime = Time.time;
             
             var target = col.collider.GetComponent<IHitTarget>();
-            
+
+            bouncesLeft--;
+
             if (target == null || target == lastHit)
             {
+                if (bouncesLeft <= 0)
+                {
+                    Effects.Emit(EffectType.Spark, 5, contact.point, contact.normal);
+                    OnExplode();
+                }
                 return;
             }
 
             lastHit = target;
 
-            bouncesLeft--;
 
             OnHit(target, new HitPoint()
             {
@@ -75,22 +81,7 @@ namespace MobRoulette.Core.Behaviours
                 OnExplode();
             }
         }
-
-       
-
-        public void Prepare()
-        {
-            bouncesLeft = bounces;
-            body.velocity = Vector3.zero;
-            body.angularVelocity = 0;
-            lastHit = null;
-            if (trail != null)
-            {
-                var trailTransform = trail.transform;
-                trailTransform.SetParent(transform);
-                trailTransform.localPosition = trailStartPos;
-            }
-        }
+        
 
         public void CleanUp()
         {
@@ -101,6 +92,7 @@ namespace MobRoulette.Core.Behaviours
         public void Shoot(IGun gun, Vector2 point, Vector2 velocity)
         {
             currentGun = gun;
+            Damage = currentGun.CalculateDamage();
             transform.position = point;
             body.velocity = velocity;
             if (trail != null)
@@ -126,6 +118,19 @@ namespace MobRoulette.Core.Behaviours
             Pool<ProjectileBehaviour>.Release(this);
         }
 
-       
+
+        public void Reuse()
+        {
+            bouncesLeft = bounces;
+            body.velocity = Vector3.zero;
+            body.angularVelocity = 0;
+            lastHit = null;
+            if (trail != null)
+            {
+                var trailTransform = trail.transform;
+                trailTransform.SetParent(transform);
+                trailTransform.localPosition = trailStartPos;
+            }
+        }
     }
 }

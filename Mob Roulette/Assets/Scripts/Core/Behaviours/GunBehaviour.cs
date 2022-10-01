@@ -34,6 +34,11 @@ namespace MobRoulette.Core.Behaviours
         {
             
         }
+
+        public float CalculateDamage()
+        {
+            return config.Damage;
+        }
     }
 }
 

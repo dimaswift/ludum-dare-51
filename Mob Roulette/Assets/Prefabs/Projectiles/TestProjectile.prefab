@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20ba7447c3d348cd93bba9daaffe5d58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bounces: 1
+  bounces: 3
   hitColor: {r: 8, g: 6.7764707, b: 0, a: 1}
 --- !u!50 &2641708875388520857
 Rigidbody2D:

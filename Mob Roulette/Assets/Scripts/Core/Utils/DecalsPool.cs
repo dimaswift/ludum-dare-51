@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using MobRoulette.Core.Behaviours;
 using MobRoulette.Core.Domain;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace MobRoulette.Core.Utils
 {

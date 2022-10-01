@@ -1,5 +1,4 @@
-﻿using System;
-using MobRoulette.Core.Domain;
+﻿using MobRoulette.Core.Domain;
 using MobRoulette.Core.Interfaces;
 using MobRoulette.Core.Utils;
 using UnityEngine;
@@ -10,7 +9,6 @@ namespace MobRoulette.Core.Behaviours
     public class Decal : MonoBehaviour, IPooled
     {
         [SerializeField] private AnimationCurve fadeCurve = AnimationCurve.Linear(0, 1, 1, 0);
-        
         
         public int PrefabId { get; set; }
 
@@ -37,14 +35,6 @@ namespace MobRoulette.Core.Behaviours
             defaultIntensity = material.GetFloat(intensityId);
         }
         
-        public void Prepare()
-        {
-            fadeDuration = 0;
-            secondsTillFade = 0;
-            material.SetColor(glowColorId, defaultColor);
-            material.SetFloat(intensityId, defaultIntensity);
-        }
-
         private void Attach(Transform target, Vector3 point)
         {
             var localPoint = target.InverseTransformPoint(point);
@@ -98,6 +88,14 @@ namespace MobRoulette.Core.Behaviours
         public void Init()
         {
             
+        }
+
+        public void Reuse()
+        {
+            fadeDuration = 0;
+            secondsTillFade = 0;
+            material.SetColor(glowColorId, defaultColor);
+            material.SetFloat(intensityId, defaultIntensity);
         }
     }
 }

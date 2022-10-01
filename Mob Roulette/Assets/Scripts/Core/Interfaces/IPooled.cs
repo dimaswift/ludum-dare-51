@@ -1,9 +1,8 @@
 ﻿namespace MobRoulette.Core.Interfaces
 {
-    public interface IPooled
+    public interface IPooled : IReusable
     {
         int PrefabId { get; set; }
-        void Prepare();
         void CleanUp();
         void Init();
     }

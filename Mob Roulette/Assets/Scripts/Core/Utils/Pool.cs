@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using MobRoulette.Core.Behaviours;
 using MobRoulette.Core.Interfaces;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -7,17 +8,19 @@ namespace MobRoulette.Core.Utils
 {
     public static class Pool<T> where T : MonoBehaviour, IPooled
     {
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void Init()
+        public static void Dispose()
         {
             foreach (var pool in pools)
             {
                 pool.Value.Dispose();
             }
+
             pools = new();
+            reusables = new();
         }
         
         private static Dictionary<int, ObjectPool<T>> pools = new();
+        private static Dictionary<IPooled, IReusable[]> reusables = new();
 
         public static T GetFromPool(T prefab)
         {
@@ -28,6 +31,7 @@ namespace MobRoulette.Core.Utils
                         var instance = Object.Instantiate(prefab.gameObject).GetComponent<T>();
                         instance.PrefabId = prefab.GetInstanceID();
                         instance.Init();
+                        reusables.Add(instance, instance.GetComponentsInChildren<IReusable>(true));
                         return instance;
                     }, OnCreate,
                     OnCleanUp);
@@ -56,7 +60,11 @@ namespace MobRoulette.Core.Utils
         private static void OnCreate(T obj)
         {
             obj.gameObject.SetActive(true);
-            obj.Prepare();
+            obj.Reuse();
+            foreach (IReusable reusable in reusables[obj])
+            {
+                reusable.Reuse();
+            }
         }
 
         private static void OnCleanUp(T obj)
@@ -65,4 +73,15 @@ namespace MobRoulette.Core.Utils
             obj.CleanUp();
         }
     }
+
+    public static class PoolDisposal
+    {
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void Init()
+        {
+            Pool<Decal>.Dispose();
+            Pool<ProjectileBehaviour>.Dispose();
+        }
+    }
+
 }
