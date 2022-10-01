@@ -8,11 +8,15 @@ namespace MobRoulette.Core.Behaviours
 {
     public class ProjectileBehaviour : MonoBehaviour, IProjectile
     {
+        public Color HitColor => hitColor;
         public Rigidbody2D Body => body;
         public int PrefabId { get; set; }
         
         [SerializeField] private int bounces;
-        [SerializeField] private float fadeOutSpeed;
+
+        [ColorUsage(true, true)]
+        [SerializeField] private Color hitColor;
+        
         
         private Rigidbody2D body;
         private IHitTarget lastHit;
@@ -22,6 +26,7 @@ namespace MobRoulette.Core.Behaviours
         private TrailRenderer trail;
         private Vector2 trailStartPos;
 
+        private float lastBounceTime;
 
         public void Init()
         {
@@ -38,6 +43,15 @@ namespace MobRoulette.Core.Behaviours
                 return;
             }
 
+            var contact = col.GetContact(0);
+            
+            if (Time.time - lastBounceTime >= 0.1f)
+            {
+                Effects.Emit(EffectType.Spark, 3, transform.position, contact.normal);
+            }
+
+            lastBounceTime = Time.time;
+            
             var target = col.collider.GetComponent<IHitTarget>();
             
             if (target == null || target == lastHit)
@@ -49,8 +63,6 @@ namespace MobRoulette.Core.Behaviours
 
             bouncesLeft--;
 
-            var contact = col.GetContact(0);
-            
             OnHit(target, new HitPoint()
             {
                 Point = Body.position,
@@ -99,6 +111,8 @@ namespace MobRoulette.Core.Behaviours
 
         public void OnHit(IHitTarget hit, HitPoint hitPoint)
         {
+            Effects.Emit(EffectType.Spark, 30, hitPoint.Point, hitPoint.Normal);
+            Effects.Play(EffectType.Smoke, hitPoint.Point);
             currentGun.RegisterHit(this, hit, hitPoint);
             hit.OnHit(this, hitPoint);
         }
@@ -111,5 +125,7 @@ namespace MobRoulette.Core.Behaviours
             }
             Pool<ProjectileBehaviour>.Release(this);
         }
+
+       
     }
 }

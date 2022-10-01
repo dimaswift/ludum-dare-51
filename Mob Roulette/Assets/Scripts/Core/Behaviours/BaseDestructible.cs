@@ -6,7 +6,7 @@ namespace MobRoulette.Core.Behaviours
 {
     public class BaseDestructible : MonoBehaviour, IHitTarget
     {
-        public void OnHit(IProjectile projectile, HitPoint hitPoint)
+        public virtual void OnHit(IProjectile projectile, HitPoint hitPoint)
         {
             Destroy(gameObject);
         }

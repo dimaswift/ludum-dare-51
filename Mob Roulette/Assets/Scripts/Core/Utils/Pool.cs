@@ -10,6 +10,10 @@ namespace MobRoulette.Core.Utils
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void Init()
         {
+            foreach (var pool in pools)
+            {
+                pool.Value.Dispose();
+            }
             pools = new();
         }
         
@@ -44,6 +48,7 @@ namespace MobRoulette.Core.Utils
         {
             if (pools.TryGetValue(instance.PrefabId, out var pool))
             {
+                instance.transform.SetParent(null);
                 pool.Release(instance);
             }
         }
