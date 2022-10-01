@@ -1,3 +1,4 @@
+using System.Collections;
 using MobRoulette.Core.Configs;
 using MobRoulette.Core.Domain;
 using MobRoulette.Core.Events;
@@ -22,9 +23,7 @@ namespace MobRoulette.Core.Behaviours
                 return false;
             }
             var projectileBehaviour = Pool<ProjectileBehaviour>.GetFromPool(config.Projectile);
-            projectileBehaviour.transform.SetPositionAndRotation(projectileSpawnPoint.position, projectileSpawnPoint.rotation);
-            projectileBehaviour.Body.velocity = transform.up * config.ProjectileSpeed;
-            projectileBehaviour.SetCurrentGun(this);
+            projectileBehaviour.Shoot(this, projectileSpawnPoint.position, projectileSpawnPoint.up * config.ProjectileSpeed);
             lastShotTime = Time.time;
             projectile = projectileBehaviour;
             EventBus.Raise<OnGunShot, (IProjectile, IGun)>((projectile, this));

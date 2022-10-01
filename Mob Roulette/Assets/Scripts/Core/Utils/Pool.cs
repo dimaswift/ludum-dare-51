@@ -23,6 +23,7 @@ namespace MobRoulette.Core.Utils
                     {
                         var instance = Object.Instantiate(prefab.gameObject).GetComponent<T>();
                         instance.PrefabId = prefab.GetInstanceID();
+                        instance.Init();
                         return instance;
                     }, OnCreate,
                     OnCleanUp);

@@ -5,5 +5,6 @@
         int PrefabId { get; set; }
         void Prepare();
         void CleanUp();
+        void Init();
     }
 }

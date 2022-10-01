@@ -1,4 +1,5 @@
-﻿using MobRoulette.Core.Domain;
+﻿using System.Collections;
+using MobRoulette.Core.Domain;
 using MobRoulette.Core.Interfaces;
 using MobRoulette.Core.Utils;
 using UnityEngine;
@@ -11,16 +12,24 @@ namespace MobRoulette.Core.Behaviours
         public int PrefabId { get; set; }
         
         [SerializeField] private int bounces;
-   
+        [SerializeField] private float fadeOutSpeed;
+        
         private Rigidbody2D body;
         private IHitTarget lastHit;
         private IGun currentGun;
         private int bouncesLeft;
-        
-        private void Awake()
+
+        private TrailRenderer trail;
+        private Vector2 trailStartPos;
+
+
+        public void Init()
         {
+            trail = GetComponentInChildren<TrailRenderer>();
             body = GetComponent<Rigidbody2D>();
+            trailStartPos = trail.transform.localPosition;
         }
+        
         
         private void OnCollisionEnter2D(Collision2D col)
         {
@@ -39,12 +48,14 @@ namespace MobRoulette.Core.Behaviours
             lastHit = target;
 
             bouncesLeft--;
+
+            var contact = col.GetContact(0);
             
             OnHit(target, new HitPoint()
             {
                 Point = Body.position,
-                Impulse = col.GetContact(0).normalImpulse,
-                Normal = col.GetContact(0).normal
+                Impulse = contact.normalImpulse,
+                Normal = contact.normal
             });
 
             if (bouncesLeft <= 0)
@@ -58,19 +69,32 @@ namespace MobRoulette.Core.Behaviours
         public void Prepare()
         {
             bouncesLeft = bounces;
-            body.velocity = Vector2.zero;
+            body.velocity = Vector3.zero;
             body.angularVelocity = 0;
             lastHit = null;
+            if (trail != null)
+            {
+                var trailTransform = trail.transform;
+                trailTransform.SetParent(transform);
+                trailTransform.localPosition = trailStartPos;
+            }
         }
 
         public void CleanUp()
         {
-            
+           
         }
 
-        public void SetCurrentGun(IGun gun)
+      
+        public void Shoot(IGun gun, Vector2 point, Vector2 velocity)
         {
             currentGun = gun;
+            transform.position = point;
+            body.velocity = velocity;
+            if (trail != null)
+            {
+                trail.Clear();
+            }
         }
 
         public void OnHit(IHitTarget hit, HitPoint hitPoint)
@@ -81,6 +105,10 @@ namespace MobRoulette.Core.Behaviours
 
         public void OnExplode()
         {
+            if (trail != null)
+            {
+                trail.transform.SetParent(null);
+            }
             Pool<ProjectileBehaviour>.Release(this);
         }
     }
