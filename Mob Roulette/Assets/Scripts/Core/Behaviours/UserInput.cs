@@ -1,12 +1,15 @@
 ﻿using System;
+using MobRoulette.Core.Utils;
 using UnityEngine;
+using UnityEngine.Animations;
 
 namespace MobRoulette.Core.Behaviours
 {
     public class UserInput : MonoBehaviour
     {
-        [SerializeField] private PlayerBehaviour playerBehaviour;
-
+        [SerializeField] private GunBehaviour gunBehaviour;
+        [SerializeField] private FlyingBehaviour flyingBehaviour;
+        [SerializeField] private Axis moveAxis = Axis.X;
         private Camera cam;
 
         private void Awake()
@@ -16,23 +19,46 @@ namespace MobRoulette.Core.Behaviours
 
         private void Update()
         {
-            if (Input.GetKey(KeyCode.A))
+            if (Input.GetKeyDown(KeyCode.R))
             {
-                playerBehaviour.MoveTowards(-1);
+                PoolDisposal.ReleaseAll();
             }
-            else if (Input.GetKey(KeyCode.D))
+            
+            Vector2 dir = Vector2.zero;
+            if (moveAxis.HasFlag(Axis.X))
             {
-                playerBehaviour.MoveTowards(1);
+                if (Input.GetKey(KeyCode.A))
+                {
+                    dir.x = -1;
+                }
+
+                if (Input.GetKey(KeyCode.D))
+                {
+                    dir.x = 1;
+                }
             }
-            else
+
+            if (moveAxis.HasFlag(Axis.Y))
             {
-                playerBehaviour.Stop();
+
+                if (Input.GetKey(KeyCode.W))
+                {
+                    dir.y = 1;
+                }
+
+                if (Input.GetKey(KeyCode.S))
+                {
+                    dir.y = -1;
+                }
             }
-            playerBehaviour.Aim(cam.ScreenToWorldPoint(Input.mousePosition));
+            
+            flyingBehaviour.Move(dir);
+
+            gunBehaviour.Aim(cam.ScreenToWorldPoint(Input.mousePosition));
 
             if (Input.GetMouseButton(0))
             {
-                playerBehaviour.Gun.TryShoot(out var projectile);
+                gunBehaviour.TryShoot();
             }
         }
     }

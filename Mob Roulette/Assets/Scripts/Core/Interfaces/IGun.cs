@@ -4,7 +4,7 @@ namespace MobRoulette.Core.Interfaces
 {
     public interface IGun
     {
-        bool TryShoot(out IProjectile projectile);
+        bool TryShoot();
         void RegisterHit(IProjectile projectile, IHitTarget target, HitPoint hitPoint);
         float CalculateDamage();
     }

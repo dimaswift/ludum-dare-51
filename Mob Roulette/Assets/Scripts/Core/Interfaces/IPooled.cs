@@ -3,7 +3,9 @@
     public interface IPooled : IReusable
     {
         int PrefabId { get; set; }
-        void CleanUp();
+        bool IsInUse { get; set; }
+        void OnCleanUp();
+        void OnDestroy();
         void Init();
     }
 }

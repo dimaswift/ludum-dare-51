@@ -22,6 +22,12 @@ namespace MobRoulette.Core.Events
                 evt = Resources.Load<BaseEvent>($"Events/{typeof(T1).Name}");
                 events.Add(typeof(T1), evt);
             }
+
+            if (evt == null)
+            {
+                throw new Exception($"Event not found. Should be in Resources/Events/{typeof(T1).Name}");
+            }
+            
             var generic = evt as BaseEventWithArgs<T2>;
             return generic;
         }

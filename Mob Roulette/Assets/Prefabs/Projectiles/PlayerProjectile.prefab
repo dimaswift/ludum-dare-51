@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2641708875388520857}
   - component: {fileID: 1069039003246099661}
   m_Layer: 6
-  m_Name: TestProjectile
+  m_Name: PlayerProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20ba7447c3d348cd93bba9daaffe5d58, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bounces: 3
+  bounces: 1
   hitColor: {r: 8, g: 6.7764707, b: 0, a: 1}
 --- !u!50 &2641708875388520857
 Rigidbody2D:
@@ -65,7 +65,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0.25
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1

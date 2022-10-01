@@ -4,7 +4,7 @@ using UnityEngine;
 namespace MobRoulette.Core.Behaviours
 {
     [RequireComponent(typeof(MeshRenderer))]
-    public class MobVisuals : MonoBehaviour, IReusable
+    public class MobVisuals : MonoBehaviour, IReusable, IScalable
     {
         [SerializeField] private DamageDecal damageDecalPrefab;
         private MeshRenderer meshRenderer;
@@ -21,17 +21,14 @@ namespace MobRoulette.Core.Behaviours
         {
             meshRenderer = GetComponent<MeshRenderer>();
             color = meshRenderer.material.color;
-
+            destroyEffect = transform.parent.GetComponentInChildren<ParticleSystem>();
             damageDecal = Instantiate(damageDecalPrefab.gameObject).GetComponent<DamageDecal>();
             var damageDecalTransform = damageDecal.transform;
             damageDecalTransform.SetParent(transform);
             damageDecalTransform.localPosition = new Vector3(0, 0, -0.5f);
             damageDecalTransform.localRotation = Quaternion.identity;
             damageDecalTransform.localScale = Vector3.one;
-            destroyEffect = transform.parent.GetComponentInChildren<ParticleSystem>();
-            var shape = destroyEffect.shape;
-            shape.scale = transform.localScale;
-            damageDecal.SetSize(transform.localScale * 0.1f);
+            ApplyNewScale();
         }
         
         public void Blink(Color color)
@@ -67,6 +64,15 @@ namespace MobRoulette.Core.Behaviours
         {
             destroyEffect.transform.SetParent(transform.parent);
             gameObject.SetActive(true);
+            
+        }
+
+        public void ApplyNewScale()
+        {
+            var scale = transform.localScale;
+            var shape = destroyEffect.shape;
+            shape.scale = scale;
+            damageDecal.SetSize(scale * 0.1f);
         }
     }
 }

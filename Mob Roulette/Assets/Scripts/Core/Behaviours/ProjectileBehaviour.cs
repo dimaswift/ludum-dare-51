@@ -11,7 +11,8 @@ namespace MobRoulette.Core.Behaviours
         public float Damage { get; set; }
         public Rigidbody2D Body => body;
         public int PrefabId { get; set; }
-        
+        public bool IsInUse { get; set; }
+
         [SerializeField] private int bounces;
 
         [ColorUsage(true, true)]
@@ -27,6 +28,14 @@ namespace MobRoulette.Core.Behaviours
         private Vector2 trailStartPos;
 
         private float lastBounceTime;
+
+        public void OnDestroy()
+        {
+            if (trail != null && trail.transform.parent != transform)
+            {
+                Destroy(trail.gameObject);
+            }
+        }
 
         public void Init()
         {
@@ -83,9 +92,9 @@ namespace MobRoulette.Core.Behaviours
         }
         
 
-        public void CleanUp()
+        public void OnCleanUp()
         {
-           
+            
         }
 
       
@@ -93,7 +102,7 @@ namespace MobRoulette.Core.Behaviours
         {
             currentGun = gun;
             Damage = currentGun.CalculateDamage();
-            transform.position = point;
+            transform.position = new Vector3(point.x,point.y, -1);
             body.velocity = velocity;
             if (trail != null)
             {

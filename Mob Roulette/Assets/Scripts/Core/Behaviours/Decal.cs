@@ -11,6 +11,7 @@ namespace MobRoulette.Core.Behaviours
         [SerializeField] private AnimationCurve fadeCurve = AnimationCurve.Linear(0, 1, 1, 0);
         
         public int PrefabId { get; set; }
+        public bool IsInUse { get; set; }
 
         private MeshRenderer meshRenderer;
         private int intensityId;
@@ -80,9 +81,14 @@ namespace MobRoulette.Core.Behaviours
             }
         }
 
-        public void CleanUp()
+        public void OnCleanUp()
         {
            
+        }
+
+        public void OnDestroy()
+        {
+            
         }
 
         public void Init()

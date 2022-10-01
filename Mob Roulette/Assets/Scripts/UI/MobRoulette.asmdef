@@ -1,0 +1,17 @@
+{
+    "name": "MobRoulette",
+    "rootNamespace": "",
+    "references": [
+        "GUID:0a06b94c697923548b4ecd6fdab02624",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

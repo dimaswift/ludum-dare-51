@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using MobRoulette.Core.Behaviours;
 using MobRoulette.Core.Interfaces;
 using UnityEngine;
@@ -10,50 +11,73 @@ namespace MobRoulette.Core.Utils
     {
         public static void Dispose()
         {
-            foreach (var pool in pools)
-            {
-                pool.Value.Dispose();
-            }
-
             pools = new();
-            reusables = new();
         }
         
-        private static Dictionary<int, ObjectPool<T>> pools = new();
-        private static Dictionary<IPooled, IReusable[]> reusables = new();
-
+        private static Dictionary<int, (ObjectPool<T> pool, HashSet<T> items)> pools = new();
+    
+        
         public static T GetFromPool(T prefab)
         {
-            if (pools.TryGetValue(prefab.GetInstanceID(), out var pool) == false)
+            if (pools.ContainsKey(prefab.GetInstanceID()) == false)
             {
-                pool = new ObjectPool<T>(() =>
+                var set = new HashSet<T>();
+                var pool = new ObjectPool<T>(() =>
                     {
                         var instance = Object.Instantiate(prefab.gameObject).GetComponent<T>();
                         instance.PrefabId = prefab.GetInstanceID();
                         instance.Init();
-                        reusables.Add(instance, instance.GetComponentsInChildren<IReusable>(true));
                         return instance;
-                    }, OnCreate,
-                    OnCleanUp);
-                pools.Add(prefab.GetInstanceID(), pool);
+                    }, i=>
+                    {
+                        set.Add(i);
+                        OnCreate(i);
+                    },
+                    i =>
+                    {
+                        set.Remove(i);
+                        OnCleanUp(i);
+                    },
+                    OnDestroy);
+                pools.Add(prefab.GetInstanceID(), (pool, set));
             }
-            return pool.Get();
+            return pools[prefab.GetInstanceID()].pool.Get();
+        }
+
+        private static void OnDestroy(T obj)
+        {
+            obj.OnDestroy();
+            Object.Destroy(obj.gameObject);
         }
 
         public static void ReleaseAll(T prefab)
         {
             if (pools.TryGetValue(prefab.GetInstanceID(), out var pool))
             {
-                pool.Clear();
+                foreach (T item in pool.items.ToArray())
+                {
+                    pool.pool.Release(item);
+                }
             }
         }
 
+        public static void ReleaseAll()
+        {
+            foreach (var data in pools)
+            {
+                foreach (T item in data.Value.items.ToArray())
+                {
+                    data.Value.pool.Release(item);
+                }
+            }
+        }
+        
         public static void Release(T instance)
         {
             if (pools.TryGetValue(instance.PrefabId, out var pool))
             {
                 instance.transform.SetParent(null);
-                pool.Release(instance);
+                pool.pool.Release(instance);
             }
         }
 
@@ -61,27 +85,32 @@ namespace MobRoulette.Core.Utils
         {
             obj.gameObject.SetActive(true);
             obj.Reuse();
-            foreach (IReusable reusable in reusables[obj])
-            {
-                reusable.Reuse();
-            }
+            obj.IsInUse = true;
         }
 
         private static void OnCleanUp(T obj)
         {
+            obj.IsInUse = false;
             obj.gameObject.SetActive(false);
-            obj.CleanUp();
+            obj.OnCleanUp();
         }
     }
 
     public static class PoolDisposal
     {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void Init()
+        public static void DisposeAll()
         {
             Pool<Decal>.Dispose();
             Pool<ProjectileBehaviour>.Dispose();
+            Pool<MobPart>.Dispose();
+        }
+
+        public static void ReleaseAll()
+        {
+            Pool<Decal>.ReleaseAll();
+            Pool<ProjectileBehaviour>.ReleaseAll();
+            Pool<MobPart>.ReleaseAll();
         }
     }
-
 }
