@@ -9,10 +9,16 @@ namespace MobRoulette.UI
     public class MainMenu : Window
     {
         [SerializeField] private Button startButton;
-
+        [SerializeField] private Button quitButton;
+        
         private void Awake()
         {
-            startButton.onClick.AddListener(() => Game.Instance.Begin());
+            quitButton.onClick.AddListener(Application.Quit);
+            startButton.onClick.AddListener(() =>
+            {
+                Game.Instance.Begin();
+                Hide();
+            });
             Game.Instance.State.Subscribe(state =>
             {
                 if (state == GameState.MainMenu)

@@ -23,15 +23,15 @@ namespace MobRoulette.Core.Behaviours
         [SerializeField] private int ammoBatchSize;
         [SerializeField] private string gunName;
         [SerializeField] private bool unlockedByDefault;
-        
+        [SerializeField] private bool equipped;
         private readonly Observable<bool> unlocked = new (false);
 
         private IGun gun;
         
-        private void Awake()
+        private void Start()
         {
-            unlocked.Set(unlockedByDefault || Game.Instance.Save.UnlockedGuns.ContainsKey(gunName));
-            Gun.SetEquipped(unlockedByDefault);
+            unlocked.Set(true);
+            Gun.SetEquipped(equipped);
         }
         
         public bool Unlock()
