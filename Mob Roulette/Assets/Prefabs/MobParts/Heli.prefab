@@ -258,13 +258,15 @@ GameObject:
   - component: {fileID: 7897081893268646356}
   - component: {fileID: 7897081893268646357}
   - component: {fileID: 7897081893268646362}
+  - component: {fileID: 1476831967813103958}
+  - component: {fileID: 862967631380351402}
   m_Layer: 8
-  m_Name: MobWithGun
+  m_Name: Heli
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &7897081893268646359
 Transform:
   m_ObjectHideFlags: 0
@@ -295,7 +297,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e22ad45a5c7548b6b3da0ac483e8f965, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1
+  maxHealth: 10
 --- !u!50 &7897081893268646357
 Rigidbody2D:
   serializedVersion: 4
@@ -309,8 +311,8 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 10
-  m_LinearDrag: 0
-  m_AngularDrag: 0.05
+  m_LinearDrag: 1
+  m_AngularDrag: 5
   m_GravityScale: 1
   m_Material: {fileID: 0}
   m_Interpolate: 0
@@ -343,6 +345,35 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 3.372992, y: 3.226}
   m_EdgeRadius: 0
+--- !u!114 &1476831967813103958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7897081893268646363}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd33686ff688455c910e848143183e7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flyingBehaviour: {fileID: 862967631380351402}
+  minDistance: 20
+  maxDistance: 30
+--- !u!114 &862967631380351402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7897081893268646363}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16ddd8c42ad442a69e8df06e2e1a4418, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 15
+  drag: 0.827
 --- !u!1 &7897081893853824314
 GameObject:
   m_ObjectHideFlags: 0

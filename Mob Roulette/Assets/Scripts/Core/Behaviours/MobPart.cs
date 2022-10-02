@@ -8,41 +8,55 @@ using Random = UnityEngine.Random;
 
 namespace MobRoulette.Core.Behaviours
 {
-    public class MobPart : MonoBehaviour, IHitTarget, IPooled
+    public class MobPart : MonoBehaviour, IHitTarget
     {
-        [SerializeField] private float maxHealth = 1f;
+        [SerializeField] private EffectType explosionEffect = EffectType.Explosion;
+        public Rigidbody2D Body => body;
+        public bool IsDead { get; private set; }
+        
+        public bool IsMain => isMainPart;
+        
+        [SerializeField] private bool isMainPart;
+        [SerializeField] private float destroyDelay = 3;
+        [SerializeField] private int maxHealth = 10;
+        public event Action<MobPart> OnBeforeKilled = m => { };
+       
         public int PrefabId { get; set; }
         public bool IsInUse { get; set; }
         private Vector3? lastDecalPoint;
         private float lastDecalTime;
         private MobVisuals[] mobVisuals;
-
-        private float health;
+        private Rigidbody2D body;
+  
+        private int health;
+        private bool exploded;
         private readonly List<Decal> addedDecals = new();
-        private MobPartRandomizer[] randomizers;
         
-
-        private void Awake()
-        {
-            randomizers = GetComponents<MobPartRandomizer>();
-            mobVisuals = GetComponentsInChildren<MobVisuals>();
-        }
+        private Joint2D[] joints;
+        private float decalPositionZ;
+        
 
         private void Start()
         {
-            Reuse();
-        }
-
-        public void Randomize()
-        {
-            foreach (MobPartRandomizer randomizer in randomizers)
+            body = GetComponent<Rigidbody2D>();
+            var decalPoint = transform.Find("DecalPoint");
+            if (decalPoint != null)
             {
-                randomizer.Randomize();
+                decalPositionZ = decalPoint.localPosition.z;
             }
+            else
+            {
+                decalPositionZ = -0.5f;
+            }
+            joints = GetComponentsInChildren<Joint2D>();
+            mobVisuals = GetComponentsInChildren<MobVisuals>();
+
             foreach (MobVisuals visual in mobVisuals)
             {
-                visual.ApplyNewScale();
+                visual.SetDamaged(0);
             }
+
+            health = maxHealth;
         }
         
         public void OnHit(IProjectile projectile, HitPoint hitPoint)
@@ -57,8 +71,10 @@ namespace MobRoulette.Core.Behaviours
             
             lastDecalPoint = hitPoint.Point;
             lastDecalTime = Time.time;
- 
-            var decal = DecalsPool.AddDecal(DecalType.MeltedMetal, hitPoint.Point, transform, new DecalData()
+
+            Vector3 decalPos = transform.InverseTransformPoint(hitPoint.Point);
+            decalPos.z = decalPositionZ;
+            var decal = DecalsPool.AddDecal(DecalType.MeltedMetal, transform.TransformPoint(decalPos), transform, new DecalData()
             {
                 Color = projectile.HitColor,
                 Duration = Random.Range(1f, 3f) + proximityMultiplier,
@@ -72,7 +88,7 @@ namespace MobRoulette.Core.Behaviours
 
             foreach (MobVisuals visuals in mobVisuals)
             {
-                visuals.SetDamaged(1f - health);
+                visuals.SetDamaged(1f - (float)health / maxHealth);
             }
             
             if (health <= 0)
@@ -83,51 +99,43 @@ namespace MobRoulette.Core.Behaviours
 
         public void Explode()
         {
+            if (exploded)
+            {
+                return;
+            }
+            exploded = true;
+            Kill();
             foreach (MobVisuals visuals in mobVisuals)
             {
                 visuals.Explode();
             }
-            Effects.Play(EffectType.Explosion, transform.position);
-            Pool<MobPart>.Release(this);
-        }
-        
-
-        public void Reuse()
-        {
+            Effects.Play(explosionEffect, transform.position);
             foreach (Decal decal in addedDecals)
             {
-                if (!decal.IsInUse)
+                if (!decal.IsInUse || decal == null)
                 {
                     continue;
                 }
+
                 Pool<Decal>.Release(decal);
             }
-
-            addedDecals.Clear();
-            gameObject.SetActive(true);
-            lastDecalTime = 0;
-            lastDecalPoint = null;
-            foreach (MobVisuals visuals in mobVisuals)
-            {
-                visuals.SetDamaged(0);
-                visuals.Reuse();
-            }
-            health = maxHealth;
+            Destroy(gameObject);
         }
         
-        public void OnCleanUp()
+        public void Kill()
         {
-            
-        }
-
-        public void OnDestroy()
-        {
-            
-        }
-
-        public void Init()
-        {
-            
+            if (IsDead)
+            {
+                return;
+            }
+            addedDecals.Clear();
+            transform.SetParent(null);
+            IsDead = true;
+            OnBeforeKilled(this);
+            foreach (Joint2D joint in joints)
+            {
+                Destroy(joint);
+            }
         }
     }
 }

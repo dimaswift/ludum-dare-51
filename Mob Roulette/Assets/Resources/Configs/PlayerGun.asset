@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: PlayerGun
   m_EditorClassIdentifier: 
   fireRate: 0.1
-  damage: 0.35
-  projectileSpeed: 60
-  aimSpeed: 50
+  damage: 3
+  projectileSpeed: 70
+  aimSpeed: 30
+  projectileLifetime: 5
   projectile: {fileID: 7977768274499272216, guid: 49076a9c474fb1542aa3219ef768c9ee,
     type: 3}

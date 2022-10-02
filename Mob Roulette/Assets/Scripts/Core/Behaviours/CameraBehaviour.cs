@@ -12,17 +12,29 @@ namespace MobRoulette.Core.Behaviours
 
         [Range(0, 1)]
         [SerializeField] private float offsetY = 0.5f;
+
+        [SerializeField] private float minSize;
+        [SerializeField] private float maxSize;
         private Transform camTransform;
         private Transform playerTransform;
         private Camera cam;
+
+        private float targetZoom;
+        private float defaultZoom;
+        
         private void Awake()
         {
+            
             cam = Camera.main;
+            targetZoom = cam.orthographicSize;
+            defaultZoom = targetZoom;
             camTransform = cam.transform;
             EventBus.Subscribe<OnGameStateChanged, GameState>(state =>
             {
                 if (state == GameState.Playing)
                 {
+                    targetZoom = defaultZoom;
+                    cam.orthographicSize = defaultZoom;
                     playerTransform = Game.Instance.Player.transform;
                     camTransform.position = GetTargetPos();
                 }
@@ -51,8 +63,9 @@ namespace MobRoulette.Core.Behaviours
             {
                 return;
             }
-            
-          
+
+            targetZoom = Mathf.Clamp(targetZoom + -Input.mouseScrollDelta.y, minSize, maxSize);
+            cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, targetZoom, Time.deltaTime * 10f);
             camTransform.position = Vector3.Lerp(camTransform.position, GetTargetPos(), followSpeed * Time.deltaTime);
         }
     }

@@ -1,4 +1,5 @@
-﻿using MobRoulette.Core.Domain;
+﻿using System;
+using MobRoulette.Core.Domain;
 using MobRoulette.Core.Interfaces;
 using MobRoulette.Core.Utils;
 using UnityEngine;
@@ -8,7 +9,7 @@ namespace MobRoulette.Core.Behaviours
     public class ProjectileBehaviour : MonoBehaviour, IProjectile
     {
         public Color HitColor => hitColor;
-        public float Damage { get; set; }
+        public int Damage { get; set; }
         public Rigidbody2D Body => body;
         public int PrefabId { get; set; }
         public bool IsInUse { get; set; }
@@ -22,10 +23,12 @@ namespace MobRoulette.Core.Behaviours
         private Rigidbody2D body;
         private IHitTarget lastHit;
         private IGun currentGun;
+        private bool exploded;
         private int bouncesLeft;
 
         private TrailRenderer trail;
         private Vector2 trailStartPos;
+        private float lifeTime;
 
         private float lastBounceTime;
 
@@ -101,12 +104,27 @@ namespace MobRoulette.Core.Behaviours
         public void Shoot(IGun gun, Vector2 point, Vector2 velocity)
         {
             currentGun = gun;
-            Damage = currentGun.CalculateDamage();
+            var info = currentGun.GetProjectileInfo();
+            lifeTime = info.Lifetime;
+            Damage = info.Damage;
             transform.position = new Vector3(point.x,point.y, -1);
             body.velocity = velocity;
             if (trail != null)
             {
                 trail.Clear();
+            }
+        }
+
+        private void Update()
+        {
+            if (lifeTime > 0 && !exploded)
+            {
+                lifeTime -= Time.deltaTime;
+                if (lifeTime <= 0)
+                {
+                    Effects.Emit(EffectType.Spark, 3, transform.position, transform.forward);
+                    OnExplode();
+                }
             }
         }
 
@@ -120,6 +138,12 @@ namespace MobRoulette.Core.Behaviours
 
         public void OnExplode()
         {
+            if (exploded)
+            {
+                return;
+            }
+
+            exploded = true;
             if (trail != null)
             {
                 trail.transform.SetParent(null);
@@ -130,6 +154,7 @@ namespace MobRoulette.Core.Behaviours
 
         public void Reuse()
         {
+            exploded = false;
             bouncesLeft = bounces;
             body.velocity = Vector3.zero;
             body.angularVelocity = 0;

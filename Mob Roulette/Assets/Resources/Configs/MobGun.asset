@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bbd8e33e00e4550b565ffaa583e57ad, type: 3}
   m_Name: MobGun
   m_EditorClassIdentifier: 
-  fireRate: 0.5
-  damage: 10
+  fireRate: 1
+  damage: 1
   projectileSpeed: 20
   aimSpeed: 50
+  projectileLifetime: 3
   projectile: {fileID: 7977768274499272216, guid: 6dafe618409cdb942a1937e796bb3ada,
     type: 3}

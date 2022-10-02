@@ -3,8 +3,8 @@ using MobRoulette.Core.Behaviours;
 
 namespace MobRoulette.Core.Interfaces
 {
-    public interface IMob : IPooled
+    public interface IMob
     {
-        void Build(List<MobPart> partPrefabs);
+     
     }
 }

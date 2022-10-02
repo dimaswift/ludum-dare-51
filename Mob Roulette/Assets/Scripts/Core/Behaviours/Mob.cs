@@ -1,51 +1,64 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MobRoulette.Core.Interfaces;
 using MobRoulette.Core.Utils;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace MobRoulette.Core.Behaviours
 {
     public class Mob : MonoBehaviour, IMob
     {
+        public event Action OnDestroyed = () => { };
+        public bool IsDead { get; private set; }
         private readonly List<MobPart> parts = new();
 
-        public void Reuse()
+        private void Start()
         {
-            foreach (MobPart mobPart in parts)
+            GetComponentsInChildren(parts);
+            foreach (MobPart part in parts)
             {
-                Pool<MobPart>.Release(mobPart);
+                part.OnBeforeKilled += OnBeforeKilled;
             }
-            parts.Clear();
         }
 
-        public int PrefabId { get; set; }
-        public bool IsInUse { get; set; }
-
-        public void OnCleanUp()
+        private void OnDestroy()
         {
-            
+            OnDestroyed();
         }
 
-        public void OnDestroy()
+        private void OnBeforeKilled(MobPart part)
         {
-            
-        }
-
-
-        public void Init()
-        {
-           
-            
-        }
-
-        public void Build(List<MobPart> partPrefabs)
-        {
-            foreach (MobPart part in partPrefabs)
+            if (IsDead)
             {
-                var partInstance = Pool<MobPart>.GetFromPool(part);
-                partInstance.transform.SetParent(transform);
-                parts.Add(partInstance);
+                return;
             }
+            parts.Remove(part);
+            if (parts.Count == 0)
+            {
+                IsDead = true;
+                Destroy(gameObject);
+                return;
+            }
+            if (!part.IsMain)
+            {
+                return;
+            }
+            IsDead = true;
+            for (var i = parts.Count - 1; i >= 0; i--)
+            {
+                var other = parts[i];
+                if (other == part)
+                {
+                    continue;
+                }
+                other.OnBeforeKilled -= OnBeforeKilled;
+                other.Kill();
+                other.Body.velocity = new Vector2(Random.Range(-5f, 5f), 20);
+                TimerUtils.Delay(Random.Range(3f, 6f), () => other.Explode());
+            }
+
+            Destroy(gameObject);
         }
     }
 }

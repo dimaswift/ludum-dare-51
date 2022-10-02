@@ -1,18 +1,15 @@
 ﻿using Core;
+using UnityEngine;
 
 namespace MobRoulette.Core.Behaviours
 {
-    public class MobGun : GunBehaviour
+    public class MobGun : MobBehaviour
     {
-        protected override void Update()
+        [SerializeField] private GunBehaviour gunBehaviour;
+        protected override void OnUpdate()
         {
-            if (Game.Instance.State.Value != GameState.Playing)
-            {
-                return;
-            }
-            base.Update();
-            TryShoot();
-            Aim(Game.Instance.Player.transform.position);
+            gunBehaviour.TryShoot();
+            gunBehaviour.Aim(Game.Instance.Player.transform.position);
         }
     }
 }

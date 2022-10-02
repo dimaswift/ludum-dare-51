@@ -8,15 +8,17 @@ namespace MobRoulette.Core.Configs
     public class GunConfig : ScriptableObject
     {
         [SerializeField] private float fireRate;
-        [SerializeField] private float damage;
+        [SerializeField] private int damage;
         [SerializeField] private float projectileSpeed;
         [SerializeField] private float aimSpeed;
+        [SerializeField] private float projectileLifetime;
         [SerializeField] private ProjectileBehaviour projectile;
 
         public float FireRate => fireRate;
-        public float Damage => damage;
+        public int Damage => damage;
         public float AimSpeed => aimSpeed;
         public float ProjectileSpeed => projectileSpeed;
+        public float ProjectileLifetime => projectileLifetime;
         public ProjectileBehaviour Projectile => projectile;
         
     }

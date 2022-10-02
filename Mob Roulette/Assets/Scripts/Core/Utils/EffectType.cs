@@ -4,6 +4,7 @@
     {
         Spark,
         Smoke,
-        Explosion
+        Explosion,
+        SmallExplosion
     }
 }

@@ -31,7 +31,7 @@ namespace MobRoulette.Core.Utils
             return Pool<Decal>.GetFromPool(prefab);
         }
         
-        public static Decal AddDecal(DecalType type, Vector3 point,Transform target, DecalData data)
+        public static Decal AddDecal(DecalType type, Vector3 point, Transform target, DecalData data)
         {
             var decal = GetFromPool(type);
             decal.Place(target, point, data);

@@ -38,12 +38,10 @@ namespace MobRoulette.Core.Behaviours
         
         private void Attach(Transform target, Vector3 point)
         {
-            var localPoint = target.InverseTransformPoint(point);
-            localPoint.z = -0.5f;
             Transform t = transform;
-            t.localScale = Vector3.one * data.Size;
+            t.localScale = new Vector3(data.Size, data.Size, 0.1f);
             t.SetParent(target, true);
-            t.localPosition = localPoint;
+            t.position = point;
         }
         
 

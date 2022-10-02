@@ -90,6 +90,10 @@ namespace MobRoulette.Core.Utils
 
         private static void OnCleanUp(T obj)
         {
+            if (obj == null)
+            {
+                return;
+            }
             obj.IsInUse = false;
             obj.gameObject.SetActive(false);
             obj.OnCleanUp();
@@ -103,14 +107,12 @@ namespace MobRoulette.Core.Utils
         {
             Pool<Decal>.Dispose();
             Pool<ProjectileBehaviour>.Dispose();
-            Pool<MobPart>.Dispose();
         }
 
         public static void ReleaseAll()
         {
             Pool<Decal>.ReleaseAll();
             Pool<ProjectileBehaviour>.ReleaseAll();
-            Pool<MobPart>.ReleaseAll();
         }
     }
 }

@@ -8,11 +8,11 @@ namespace MobRoulette.Core.Behaviours
 {
     public class Player : MonoBehaviour, IHitTarget
     {
-        public IObservableValue<float> Health => health;
+        public IObservableValue<int> Health => health;
 
-        [SerializeField] private float maxHealth = 100;
+        [SerializeField] private int maxHealth = 100;
 
-        private readonly Observable<float> health = new(0);
+        private readonly Observable<int> health = new(0);
 
         public void OnHit(IProjectile projectile, HitPoint hitPoint)
         {

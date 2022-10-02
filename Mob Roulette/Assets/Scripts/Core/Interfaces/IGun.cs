@@ -6,6 +6,6 @@ namespace MobRoulette.Core.Interfaces
     {
         bool TryShoot();
         void RegisterHit(IProjectile projectile, IHitTarget target, HitPoint hitPoint);
-        float CalculateDamage();
+        ProjectileInfo GetProjectileInfo();
     }
 }

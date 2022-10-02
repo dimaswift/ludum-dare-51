@@ -8,6 +8,8 @@ namespace MobRoulette.Core.Behaviours
 {
     public class FlyingBehaviour : MonoBehaviour
     {
+        public float SpeedMultiplier { get; set; } = 1f;
+        
         [SerializeField] private float moveSpeed;
 
         [Range(0.01f, 1f)]
@@ -28,7 +30,7 @@ namespace MobRoulette.Core.Behaviours
         
         private void FixedUpdate()
         {
-            body.velocity = Vector2.Lerp(body.velocity, moveDirection * moveSpeed, Time.deltaTime / drag);
+            body.velocity = Vector2.Lerp(body.velocity, moveDirection * (moveSpeed * SpeedMultiplier), Time.deltaTime / drag);
         }
     }
 }

@@ -9,6 +9,6 @@ namespace MobRoulette.Core.Interfaces
         void OnHit(IHitTarget hit, HitPoint hitPoint);
         void OnExplode();
         Color HitColor { get; }
-        float Damage { get; set; }
+        int Damage { get; set; }
     }
 }
