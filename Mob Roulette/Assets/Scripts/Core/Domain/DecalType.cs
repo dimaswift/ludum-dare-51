@@ -1,9 +1,10 @@
-﻿namespace MobRoulette.Core.Utils
+﻿namespace MobRoulette.Core.Domain
 {
     public enum DecalType
     {
         MeltedMetal,
         SmallFire,
-        FadingFire
+        FadingFire,
+        Smoke
     }
 }

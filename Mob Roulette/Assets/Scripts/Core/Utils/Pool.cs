@@ -83,6 +83,10 @@ namespace MobRoulette.Core.Utils
 
         private static void OnCreate(T obj)
         {
+            if (obj == null)
+            {
+                return;
+            }
             obj.gameObject.SetActive(true);
             obj.Reuse();
             obj.IsInUse = true;

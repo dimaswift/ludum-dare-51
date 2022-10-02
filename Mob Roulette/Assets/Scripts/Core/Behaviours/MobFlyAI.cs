@@ -1,5 +1,4 @@
-﻿using System;
-using Core;
+﻿using Core;
 using UnityEngine;
 
 namespace MobRoulette.Core.Behaviours
@@ -10,26 +9,26 @@ namespace MobRoulette.Core.Behaviours
         [SerializeField] private float minDistance = 5;
         [SerializeField] private float maxDistance = 5;
 
+        private Vector3 targetOffset;
+        
+        private void Start()
+        {
+            targetOffset = new Vector2(Random.Range(minDistance, maxDistance), Random.Range(minDistance, maxDistance));
+        }
+
         protected override void OnUpdate()
         {
             var target = Game.Instance.Player.transform.position;
-            var direction = target - transform.position;
-            var dist = direction.magnitude;
-            if (dist > minDistance)
+            var pos = transform.position;
+            if (target.y > pos.y)
             {
-                flyingBehaviour.SpeedMultiplier = 1;
-                flyingBehaviour.Move(direction.normalized);
-            }
-            else if (dist < maxDistance)
-            {
-                flyingBehaviour.SpeedMultiplier = 0.5f;
-                flyingBehaviour.Move(-direction.normalized);
-            }
-            else
-            {
-                flyingBehaviour.SpeedMultiplier = 0.5f;
+                flyingBehaviour.SpeedMultiplier = 2;
                 flyingBehaviour.Move(Vector2.up);
+                return;
             }
+            flyingBehaviour.SpeedMultiplier = 1;
+            flyingBehaviour.Move(target + targetOffset);
+           
         }
     }
 }

@@ -9,7 +9,7 @@ namespace MobRoulette.Core.Utils
 {
     public static class Effects
     {
-        private static Dictionary<EffectType, ParticleSystem> effects = new();
+        private static Dictionary<EffectType, Effect> effects = new();
 
         private static Collider2D[] colliderBuffer = new Collider2D[32];
          
@@ -23,14 +23,14 @@ namespace MobRoulette.Core.Utils
 
         private static Transform root;
         
-        private static ParticleSystem Get(EffectType type)
+        private static Effect Get(EffectType type)
         {
             if (effects.TryGetValue(type, out var effect))
             {
                 return effect;
             }
 
-            effect = Object.Instantiate(Resources.Load<GameObject>($"Effects/{type}")).GetComponent<ParticleSystem>();
+            effect = Object.Instantiate(Resources.Load<GameObject>($"Effects/{type}")).GetComponent<Effect>();
 
             if (root == null)
             {
@@ -53,9 +53,8 @@ namespace MobRoulette.Core.Utils
         {
             var effect = Get(type);
             var transform = effect.transform;
-            transform.position = new Vector3(point.x, point.y, -9);
-            transform.up = normal;
-            effect.Emit(amount);
+          
+            effect.Emit(point, normal, amount);
         }
         
         public static void Explode(Vector2 point, float radius, int damage)
@@ -76,11 +75,7 @@ namespace MobRoulette.Core.Utils
         public static void Play(EffectType type, Vector2 point, Vector2 normal = default)
         {
             var effect = Get(type);
-            var transform = effect.transform;
-    
-            transform.position = new Vector3(point.x, point.y, -9);
-            transform.up = normal;
-            effect.Play();
+            effect.Play(point, normal);
         }
     }
 }

@@ -6,7 +6,7 @@ namespace MobRoulette.Core.Interfaces
 {
     public interface IGun
     {
-        bool TryShoot();
+        bool TryShoot(out IProjectile projectile);
         void Aim(Vector2 target);
         void SetEquipped(bool equipped);
         void RegisterHit(IProjectile projectile, IHitTarget target, HitPoint hitPoint);

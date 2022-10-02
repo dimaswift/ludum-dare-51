@@ -27,8 +27,10 @@ namespace Core
         
         [SerializeField] private Player playerPrefab;
         [SerializeField] private Transform spawnPoint;
+        [SerializeField] private MobSpawner mobSpawner;
         public Player Player { get; private set; }
-
+        public MobSpawner MobSpawner => mobSpawner;
+        
         private readonly Observable<GameState> state = new(GameState.MainMenu);
         public IObservableValue<GameState> State => state;
         

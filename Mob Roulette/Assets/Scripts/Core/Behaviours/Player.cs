@@ -7,8 +7,10 @@ using UnityEngine;
 
 namespace MobRoulette.Core.Behaviours
 {
-    public class Player : MonoBehaviour, IHitTarget
+    public class Player : MonoBehaviour, IHitTarget, IRocketTarget
     {
+        public bool ShouldFollow => health > 0;
+        public Vector2 Position => body.position;
         public IObservableValue<int> Health => health;
 
         [SerializeField] private int maxHealth = 100;
@@ -50,5 +52,6 @@ namespace MobRoulette.Core.Behaviours
         {
             health.Set(maxHealth);
         }
+
     }
 }

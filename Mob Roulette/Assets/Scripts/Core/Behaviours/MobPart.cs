@@ -8,14 +8,19 @@ using Random = UnityEngine.Random;
 
 namespace MobRoulette.Core.Behaviours
 {
-    public class MobPart : MonoBehaviour, IHitTarget
+    public class MobPart : MonoBehaviour, IHitTarget, IRocketTarget
     {
+        public bool ShouldFollow => !Deactivated;
+        public Vector2 Position => body.position;
         public event Action<MobPart> OnBeforeKilled = m => { };
         public Rigidbody2D Body => body;
-        public bool IsDead { get; private set; }
-        public bool IsOnFire { get; private set; }
+        public bool Deactivated { get; private set; }
+        public bool IsOnFire => permanentDecals.ContainsKey(DecalType.SmallFire);
+        public bool IsSmoking => permanentDecals.ContainsKey(DecalType.Smoke);
+        
         public bool IsMain => isMainPart;
         
+       
         [SerializeField] private EffectType explosionEffect = EffectType.Explosion;
         [SerializeField] private bool isMainPart;
         [SerializeField] private int maxHealth = 10;
@@ -32,8 +37,8 @@ namespace MobRoulette.Core.Behaviours
         private readonly List<Decal> addedDecals = new();
         private Joint2D[] joints;
         private float decalPositionZ;
-        private Decal currentFireDecal;
-        
+
+        private readonly Dictionary<DecalType, Decal> permanentDecals = new ();
 
         private void Start()
         {
@@ -71,11 +76,20 @@ namespace MobRoulette.Core.Behaviours
             if (health <= 0)
             {
                 Explode();
+                return;
             }
 
-            if (health <= maxHealth / 2f && !IsOnFire)
+            if (health <= maxHealth / 4f && !IsOnFire)
             {
-                SetOnFire(true);
+                DetachPermanentDecal(DecalType.Smoke);
+                AttachPermanentDecal(DecalType.SmallFire, 3);
+                return;
+            }
+            
+            if (health <= maxHealth / 2f && !IsSmoking)
+            {
+               
+                AttachPermanentDecal(DecalType.Smoke, 3);
             }
         }
         
@@ -114,6 +128,7 @@ namespace MobRoulette.Core.Behaviours
             var dist = Mathf.FloorToInt(dir.magnitude);
             DealDamage(damage - dist);
             Body.AddForce(dir.normalized * (1000 - dist), ForceMode2D.Impulse);
+            Body.AddTorque(Random.Range(-1000f, 1000f), ForceMode2D.Impulse);
         }
 
         public void Explode()
@@ -138,54 +153,59 @@ namespace MobRoulette.Core.Behaviours
 
                 Pool<Decal>.Release(decal);
             }
+
+            foreach (var permanentDecal in permanentDecals)
+            {
+                Pool<Decal>.Release(permanentDecal.Value);
+            }
+
+            permanentDecals.Clear();
             addedDecals.Clear();
             Destroy(gameObject);
         }
 
-        public void SetOnFire(bool isOnFire)
+        public void AttachPermanentDecal(DecalType type, float size)
         {
-            if (isOnFire == IsOnFire)
+            if (permanentDecals.ContainsKey(type))
             {
                 return;
             }
-            
-            IsOnFire = isOnFire;
-            if (IsOnFire)
-            {
-                var pos = firePosition != null ? firePosition.position : transform.position;
-                pos.z = decalPositionZ;
-                currentFireDecal = DecalsPool.AddDecal(DecalType.SmallFire, pos, transform,
-                    new DecalData()
-                    {
-                        Duration = -1,
-                        Size = 3f
-                    });
-                addedDecals.Add(currentFireDecal);
-            }
-            else
-            {
-                if (currentFireDecal != null)
+
+            var pos = firePosition != null ? firePosition.position : transform.position;
+            pos.z = decalPositionZ;
+            permanentDecals[type] = DecalsPool.AddDecal(type, pos, transform,
+                new DecalData()
                 {
-                    Pool<Decal>.Release(currentFireDecal);
-                    currentFireDecal = null;
-                }
+                    Duration = -1,
+                    Size = size
+                });
+        }
+
+        public void DetachPermanentDecal(DecalType type)
+        {
+            if (!permanentDecals.ContainsKey(type))
+            {
+                return;
             }
-         
+
+            Pool<Decal>.Release(permanentDecals[type]);
+            permanentDecals.Remove(type);
         }
         
         public void Kill()
         {
-            if (IsDead)
+            if (Deactivated)
             {
                 return;
             }
             transform.SetParent(null);
-            IsDead = true;
+            Deactivated = true;
             OnBeforeKilled(this);
             foreach (Joint2D joint in joints)
             {
                 Destroy(joint);
             }
         }
+
     }
 }

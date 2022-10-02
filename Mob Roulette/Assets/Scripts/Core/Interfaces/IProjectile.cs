@@ -9,5 +9,6 @@ namespace MobRoulette.Core.Interfaces
         void OnHit(IHitTarget hit, HitPoint hitPoint);
         void OnExplode(Vector2 normal);
         IGun CurrentGun { get; }
+        void SetFollowTarget(IRocketTarget target);
     }
 }

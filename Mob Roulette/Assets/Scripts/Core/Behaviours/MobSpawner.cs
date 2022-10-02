@@ -8,6 +8,8 @@ namespace MobRoulette.Core.Behaviours
 {
     public class MobSpawner : MonoBehaviour
     {
+        public IEnumerable<Mob> SpawnedMobs => spawnedMobs;
+
         [SerializeField] private Mob[] prefabs;
         [SerializeField] private float spawnRate = 10;
 
@@ -20,6 +22,26 @@ namespace MobRoulette.Core.Behaviours
         private Transform[] spawnPoints;
         
         private readonly List<Mob> spawnedMobs = new ();
+
+        public Mob FindClosestAliveMob(Vector2 point)
+        {
+            var closest = float.MaxValue;
+            Mob closestMob = null;
+            foreach (Mob mob in spawnedMobs)
+            {
+                if (mob.IsDead)
+                {
+                    continue;
+                }
+                var dist = Vector2.SqrMagnitude(mob.Position - point);
+                if (dist < closest)
+                {
+                    closest = dist;
+                    closestMob = mob;
+                }
+            }
+            return closestMob;
+        }
 
         private void Awake()
         {
@@ -55,9 +77,16 @@ namespace MobRoulette.Core.Behaviours
             
             if (Time.time - lastSpawn >= currentSpawnRate)
             {
+
+                if (spawnedMobs.Count > 3)
+                {
+                    return;
+                }
+                
+                lastSpawn = Time.time;
                 for (int i = 0; i < wave; i++)
                 {
-                    lastSpawn = Time.time;
+                   
                     var pointIndex = Random.Range(0, spawnPoints.Length);
                     while (pointIndex == lastSpawnPointIndex)
                     {

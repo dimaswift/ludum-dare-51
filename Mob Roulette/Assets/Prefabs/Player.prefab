@@ -129,6 +129,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8d8b7b8da0742742a574da50c07bf50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  shootVolume: 0.5
   minDistanceToShoot: 0
   projectileSpawnPoint: {fileID: 7997110247087877952}
   config: {fileID: 11400000, guid: e1a444e97a072d3459cae7740ff1a7bf, type: 2}
@@ -262,6 +263,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8d8b7b8da0742742a574da50c07bf50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  shootVolume: 0.5
   minDistanceToShoot: 0
   projectileSpawnPoint: {fileID: 1803794024554618846}
   config: {fileID: 11400000, guid: d17a9e55ff8c314469b1c3ad272a3f75, type: 2}
@@ -446,14 +448,14 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 10
+  m_Mass: 20
   m_LinearDrag: 0
   m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
-  m_Interpolate: 1
+  m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 0
 --- !u!114 &1803794024958210427
 MonoBehaviour:
@@ -627,6 +629,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8d8b7b8da0742742a574da50c07bf50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  shootVolume: 0.5
   minDistanceToShoot: 0
   projectileSpawnPoint: {fileID: 4417262365753279845}
   config: {fileID: 11400000, guid: befba3433a8f8ae4ab9655309561231e, type: 2}

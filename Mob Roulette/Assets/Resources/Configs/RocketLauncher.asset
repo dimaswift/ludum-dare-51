@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: RocketLauncher
   m_EditorClassIdentifier: 
   fireRate: 1
-  damage: 1
+  damage: 15
   projectileSpeed: 5
   aimSpeed: 50
   projectileLifetime: 10
@@ -22,6 +22,7 @@ MonoBehaviour:
   isExplosive: 1
   explosionRadius: 7
   explosionEffect: 2
-  decalType: 1
+  decalType: 2
+  shootSound: 4
   projectileAcceleration: 20
   extraDecalDuration: 3

@@ -1,4 +1,4 @@
-﻿namespace MobRoulette.Core.Utils
+﻿namespace MobRoulette.Core.Domain
 {
     public enum EffectType
     {

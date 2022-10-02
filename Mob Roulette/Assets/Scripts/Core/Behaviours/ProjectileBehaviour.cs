@@ -7,14 +7,15 @@ namespace MobRoulette.Core.Behaviours
 {
     public class ProjectileBehaviour : MonoBehaviour, IProjectile
     {
+        [SerializeField] private int bounces;
         public int Damage { get; set; }
         public IGun CurrentGun => currentGun;
+
         public Rigidbody2D Body => body;
         public int PrefabId { get; set; }
         public bool IsInUse { get; set; }
 
-        [SerializeField] private int bounces;
-
+        
         private Rigidbody2D body;
         private IHitTarget lastHit;
         private IGun currentGun;
@@ -25,10 +26,18 @@ namespace MobRoulette.Core.Behaviours
         private ParticleSystem effect;
 
         private float lifeTime;
-
+        private bool expired;
         private float lastBounceTime;
         
         private IDefaultStateSaver[] positionSavers;
+        private IRocketTarget followTarget;
+        private float currentAimAcceleration;
+
+        public void SetFollowTarget(IRocketTarget target)
+        {
+            followTarget = target;
+        }
+
 
         public void OnDestroy()
         {
@@ -124,21 +133,82 @@ namespace MobRoulette.Core.Behaviours
             }
         }
 
-        private void Update()
+        private void ProcessAutoFollow()
         {
-            if (lifeTime > 0 && !exploded)
+            if (expired)
             {
-                lifeTime -= Time.deltaTime;
-                if (lifeTime <= 0)
-                {
-                    OnExplode(transform.forward);
-                }
+                return;
+            }
+            
+            if (followTarget == null)
+            {
+                return;
             }
 
-            if (!exploded && currentGun != null && currentGun.Config.ProjectileAcceleration > 0)
+            if (followTarget.ShouldFollow == false)
             {
-                body.velocity += body.velocity.normalized * currentGun.Config.ProjectileAcceleration * Time.deltaTime;
+                followTarget = null;
+                return;
             }
+
+            var pos = transform.position;
+            var targetPoint = followTarget.Position;
+            var angle =
+                Mathf.Atan2(targetPoint.y - pos.y, targetPoint.x - pos.x) * Mathf.Rad2Deg -
+                90;
+            currentAimAcceleration = Mathf.Lerp(currentAimAcceleration, currentGun.Config.ProjectileAutoAimSpeed,
+                Time.deltaTime * 5);
+            body.MoveRotation(Mathf.LerpAngle(body.rotation, angle,
+                Time.deltaTime * currentAimAcceleration));
+            body.velocity = transform.up * body.velocity.magnitude;
+        }
+
+        private void ProcessAcceleration()
+        {
+            if (expired || exploded || currentGun == null)
+            {
+                return;
+            }
+           
+            if (currentGun.Config.ProjectileAcceleration <= 0)
+            {
+                return;
+            }
+
+            var velocity = body.velocity;
+            velocity += velocity.normalized * (currentGun.Config.ProjectileAcceleration * Time.deltaTime);
+            body.velocity = Vector2.ClampMagnitude(velocity, currentGun.Config.ProjectileMaxSpeed);
+        }
+
+        private void ProcessExpiration()
+        {
+            if (expired || exploded)
+            {
+                return;
+            }
+            lifeTime -= Time.deltaTime;
+            if (lifeTime > 0)
+            {
+                return;
+            }
+
+            expired = true;
+            if (currentGun.Config.ExplodeOnExpire)
+            {
+                OnExplode(transform.forward);
+                return;
+            }
+            
+            DetachEffects();
+            body.gravityScale = 1;
+        }
+        
+        private void Update()
+        {
+            ProcessExpiration();
+            ProcessAutoFollow();
+            ProcessAcceleration();
+            
         }
 
         public void OnHit(IHitTarget hit, HitPoint hitPoint)
@@ -147,7 +217,19 @@ namespace MobRoulette.Core.Behaviours
             Effects.Play(EffectType.Smoke, hitPoint.Point);
             currentGun.RegisterHit(this, hit, hitPoint);
             hit.OnHit(this, hitPoint);
-            
+        }
+
+        private void DetachEffects()
+        {
+            if (trail != null)
+            {
+                trail.transform.SetParent(null);
+            }
+
+            if (effect != null)
+            {
+                effect.transform.SetParent(null);
+            }
         }
 
         public void OnExplode(Vector2 normal)
@@ -163,21 +245,18 @@ namespace MobRoulette.Core.Behaviours
                 Effects.Explode(transform.position, currentGun.Config.ExplosionRadius, currentGun.Config.Damage);
             }
 
+            DetachEffects();
             exploded = true;
-            if (trail != null)
-            {
-                trail.transform.SetParent(null);
-            }
-            if (effect != null)
-            {
-                effect.transform.SetParent(null);
-            }
+            
             Pool<ProjectileBehaviour>.Release(this);
         }
 
 
         public void Reuse()
         {
+            expired = false;
+            currentAimAcceleration = 0;
+            followTarget = null;
             if (effect != null)
             {
                 effect.Pause();

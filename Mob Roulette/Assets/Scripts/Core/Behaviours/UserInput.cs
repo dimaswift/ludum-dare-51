@@ -1,4 +1,5 @@
 ﻿using System;
+using Core;
 using MobRoulette.Core.Interfaces;
 using MobRoulette.Core.Utils;
 using UnityEngine;
@@ -13,7 +14,7 @@ namespace MobRoulette.Core.Behaviours
         private Camera cam;
         private int gunIndex;
         private IGun[] guns;
-
+        
         private readonly KeyCode[] gunKeys =
         {
             KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3, KeyCode.Alpha4, KeyCode.Alpha5
@@ -27,11 +28,6 @@ namespace MobRoulette.Core.Behaviours
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                PoolDisposal.ReleaseAll();
-            }
-            
             Vector2 dir = Vector2.zero;
 
             for (int i = 0; i < guns.Length; i++)
@@ -84,7 +80,17 @@ namespace MobRoulette.Core.Behaviours
 
                 if (Input.GetMouseButton(0))
                 {
-                    currentGun.TryShoot();
+                    if (currentGun.TryShoot(out var projectile))
+                    {
+                        if (projectile.CurrentGun.Config.ProjectileAutoAimSpeed > 0)
+                        {
+                            var closest = Game.Instance.MobSpawner.FindClosestAliveMob(transform.position);
+                            if (closest != null)
+                            {
+                                projectile.SetFollowTarget(closest.MainPart);
+                            }
+                        }
+                    }
                 }
             }
         }

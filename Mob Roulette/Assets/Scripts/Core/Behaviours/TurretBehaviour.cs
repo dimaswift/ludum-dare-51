@@ -10,6 +10,7 @@ namespace MobRoulette.Core.Behaviours
 {
     public sealed class TurretBehaviour : MonoBehaviour, IGun
     {
+        [SerializeField] private float shootVolume = 0.5f;
         [SerializeField] private float minDistanceToShoot;
         [SerializeField] private Transform projectileSpawnPoint;
         [SerializeField] private GunConfig config;
@@ -19,20 +20,23 @@ namespace MobRoulette.Core.Behaviours
         private float currentAimAngle;
         public GunConfig Config => config;
 
-        public bool TryShoot()
+        public bool TryShoot(out IProjectile projectile)
         {
             if (Time.time - lastShotTime < config.FireRate)
             {
+                projectile = null;
                 return false;
             }
             var projectileBehaviour = Pool<ProjectileBehaviour>.GetFromPool(config.Projectile);
             projectileBehaviour.Shoot(this, projectileSpawnPoint.position, projectileSpawnPoint.up * config.ProjectileSpeed);
             projectileBehaviour.transform.rotation = projectileSpawnPoint.rotation;
             lastShotTime = Time.time;
+            Sounds.PlaySound(config.ShootSound, projectileSpawnPoint.position, shootVolume);
             EventBus.Raise<OnGunShot, (IProjectile, IGun)>((projectileBehaviour, this));
+            projectile = projectileBehaviour;
             return true;
-        } 
-
+        }
+        
         public void Aim(Vector2 target)
         {
             targetPoint = target;

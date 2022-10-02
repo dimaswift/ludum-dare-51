@@ -8,16 +8,18 @@ namespace MobRoulette.Core.Behaviours
     public class MobVisuals : MonoBehaviour
     {
         [SerializeField] private ParticleSystem destroyEffect;
-        [SerializeField] private DamageDecal damageDecal;
+        
+        
+        private DamageDecal damageDecal;
 
-        private void Start()
+        private void Awake()
         {
-            damageDecal.SetSize(transform.parent.localScale);
+            damageDecal = GetComponentInChildren<DamageDecal>();
+            damageDecal.SetSize(transform.localScale);
         }
 
         public void SetDamaged(float damagePercent)
         {
-           
             damageDecal.SetDamaged(damagePercent);
         }
         
