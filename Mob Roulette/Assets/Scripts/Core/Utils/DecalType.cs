@@ -2,6 +2,8 @@
 {
     public enum DecalType
     {
-        MeltedMetal
+        MeltedMetal,
+        SmallFire,
+        FadingFire
     }
 }

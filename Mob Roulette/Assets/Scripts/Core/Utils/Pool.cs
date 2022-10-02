@@ -90,13 +90,13 @@ namespace MobRoulette.Core.Utils
 
         private static void OnCleanUp(T obj)
         {
-            if (obj == null)
+            if (obj == null || obj.IsInUse == false)
             {
                 return;
             }
             obj.IsInUse = false;
-            obj.gameObject.SetActive(false);
             obj.OnCleanUp();
+            obj.gameObject.SetActive(false);
         }
     }
 

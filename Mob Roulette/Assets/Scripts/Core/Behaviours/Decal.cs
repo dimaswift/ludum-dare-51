@@ -1,87 +1,41 @@
 ﻿using MobRoulette.Core.Domain;
 using MobRoulette.Core.Interfaces;
-using MobRoulette.Core.Utils;
 using UnityEngine;
 
 namespace MobRoulette.Core.Behaviours
 {
-    [RequireComponent(typeof(MeshRenderer))]
     public class Decal : MonoBehaviour, IPooled
     {
-        [SerializeField] private AnimationCurve fadeCurve = AnimationCurve.Linear(0, 1, 1, 0);
-        
         public int PrefabId { get; set; }
         public bool IsInUse { get; set; }
-
-        private MeshRenderer meshRenderer;
-        private int intensityId;
-        private int glowColorId;
+        protected DecalData data;
+        private ParticleSystem effect;
+        private Vector3 effectPos;
+        private float width;
         
-        private float secondsTillFade;
-        private float fadeDuration;
-        private Material material;
+      
 
-        private Color defaultColor;
-        private float defaultIntensity;
-
-        private DecalData data;
-        
-        private void Awake()
-        {
-            meshRenderer = GetComponent<MeshRenderer>();
-            intensityId = Shader.PropertyToID("_Intensity");
-            glowColorId = Shader.PropertyToID("_Glow");
-            material = meshRenderer.material;
-            defaultColor = material.GetColor(glowColorId);
-            defaultIntensity = material.GetFloat(intensityId);
-        }
-        
         private void Attach(Transform target, Vector3 point)
         {
             Transform t = transform;
-            t.localScale = new Vector3(data.Size, data.Size, 0.1f);
+            t.localScale = new Vector3(data.Size, data.Size, width);
             t.SetParent(target, true);
             t.position = point;
         }
         
-
-        public void Place(Transform target, Vector3 point, DecalData data)
+        public virtual void Place(Transform target, Vector3 point, DecalData data)
         {
             this.data = data;
-            
-            if (data.Duration > 0)
-            {
-                secondsTillFade = data.Duration;
-            }
-            
-            fadeDuration = data.Duration;
-
-            if (data.Color.maxColorComponent > 0)
-            {
-                material.SetColor(glowColorId, data.Color);
-            }
-
             Attach(target, point);
-        }
-
-        private void Update()
-        {
-            if (secondsTillFade > 0)
-            {
-                secondsTillFade = Mathf.Max(0, secondsTillFade - Time.deltaTime);
-                var intensity = (defaultIntensity + data.ExtraIntensity) *
-                                fadeCurve.Evaluate(Mathf.Clamp(secondsTillFade / fadeDuration, 0, 1));
-                material.SetFloat(intensityId, Mathf.Clamp(intensity, 0, 5));
-                if (secondsTillFade <= 0)
-                {
-                    Pool<Decal>.Release(this);
-                }
-            }
         }
 
         public void OnCleanUp()
         {
-           
+            if (effect != null)
+            {
+                effect.transform.SetParent(null, true);
+                effect.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            }
         }
 
         public void OnDestroy()
@@ -89,17 +43,25 @@ namespace MobRoulette.Core.Behaviours
             
         }
 
-        public void Init()
+        public virtual void Init()
         {
-            
+            width = transform.localScale.z;
+            effect = GetComponentInChildren<ParticleSystem>();
+            if (effect != null)
+            {
+                effectPos = effect.transform.localPosition;
+            }
         }
 
-        public void Reuse()
+        public virtual void Reuse()
         {
-            fadeDuration = 0;
-            secondsTillFade = 0;
-            material.SetColor(glowColorId, defaultColor);
-            material.SetFloat(intensityId, defaultIntensity);
+            if (effect != null)
+            {
+                var effectTransform = effect.transform;
+                effectTransform.SetParent(transform);
+                effectTransform.localPosition = effectPos;
+                effect.Play();
+            }
         }
     }
 }

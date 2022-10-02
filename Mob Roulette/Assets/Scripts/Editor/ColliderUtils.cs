@@ -18,5 +18,6 @@ public class ColliderUtils
 
         collider.size = mesh.bounds.size;
         collider.offset = mesh.transform.localPosition;
+        EditorUtility.SetDirty(collider);
     }
 }

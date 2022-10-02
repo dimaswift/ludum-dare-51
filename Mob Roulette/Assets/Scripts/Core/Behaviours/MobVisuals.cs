@@ -1,4 +1,5 @@
-﻿using MobRoulette.Core.Interfaces;
+﻿using System;
+using MobRoulette.Core.Interfaces;
 using UnityEngine;
 
 namespace MobRoulette.Core.Behaviours
@@ -8,9 +9,15 @@ namespace MobRoulette.Core.Behaviours
     {
         [SerializeField] private ParticleSystem destroyEffect;
         [SerializeField] private DamageDecal damageDecal;
-        
+
+        private void Start()
+        {
+            damageDecal.SetSize(transform.parent.localScale);
+        }
+
         public void SetDamaged(float damagePercent)
         {
+           
             damageDecal.SetDamaged(damagePercent);
         }
         

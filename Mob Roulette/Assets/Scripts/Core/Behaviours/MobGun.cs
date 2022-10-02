@@ -1,15 +1,25 @@
 ﻿using Core;
-using UnityEngine;
+using MobRoulette.Core.Interfaces;
 
 namespace MobRoulette.Core.Behaviours
 {
     public class MobGun : MobBehaviour
     {
-        [SerializeField] private GunBehaviour gunBehaviour;
+        private IGun gun;
+        
+        private void Start()
+        {
+            gun = GetComponent<IGun>();
+        }
+
         protected override void OnUpdate()
         {
-            gunBehaviour.TryShoot();
-            gunBehaviour.Aim(Game.Instance.Player.transform.position);
+            if (gun == null)
+            {
+                return;
+            }
+            gun.TryShoot();
+            gun.Aim(Game.Instance.Player.transform.position);
         }
     }
 }

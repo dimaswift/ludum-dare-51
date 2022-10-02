@@ -18,7 +18,7 @@ namespace MobRoulette.Core.Behaviours
             GetComponentsInChildren(parts);
             foreach (MobPart part in parts)
             {
-                part.OnBeforeKilled += OnBeforeKilled;
+                part.OnBeforeKilled += OnPartKilled;
             }
         }
 
@@ -27,7 +27,7 @@ namespace MobRoulette.Core.Behaviours
             OnDestroyed();
         }
 
-        private void OnBeforeKilled(MobPart part)
+        private void OnPartKilled(MobPart part)
         {
             if (IsDead)
             {
@@ -52,9 +52,11 @@ namespace MobRoulette.Core.Behaviours
                 {
                     continue;
                 }
-                other.OnBeforeKilled -= OnBeforeKilled;
+                other.OnBeforeKilled -= OnPartKilled;
                 other.Kill();
-                other.Body.velocity = new Vector2(Random.Range(-5f, 5f), 20);
+                var dir = other.transform.position - part.transform.position;
+                other.SetOnFire(true);
+                other.Body.velocity = new Vector2(Mathf.Sign(dir.x) * Random.Range(5f, 10f), Random.Range(10f, 20f));
                 TimerUtils.Delay(Random.Range(3f, 6f), () => other.Explode());
             }
 

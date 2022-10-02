@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using System;
+using Core;
 using MobRoulette.Core.Domain;
 using MobRoulette.Core.Interfaces;
 using MobRoulette.Core.Utils;
@@ -14,9 +15,22 @@ namespace MobRoulette.Core.Behaviours
 
         private readonly Observable<int> health = new(0);
 
+        private IGun[] guns;
+        private Rigidbody2D body;
+
+        private void Awake()
+        {
+            body = GetComponent<Rigidbody2D>();
+            guns = GetComponentsInChildren<IGun>();
+            for (int i = 0; i < guns.Length; i++)
+            {
+                guns[i].SetEquipped(i == 0);
+            }
+        }
+
         public void OnHit(IProjectile projectile, HitPoint hitPoint)
         {
-            health.Set(health - projectile.Damage);
+            health.Set(health - projectile.CurrentGun.GetProjectileInfo().Damage);
             if (health.Value <= 0)
             {
                 Effects.Play(EffectType.Explosion, transform.position);
@@ -24,8 +38,13 @@ namespace MobRoulette.Core.Behaviours
                 Game.Instance.GameOver();
             }
         }
-        
-        
+
+        public void OnExplode(float maxRadius, int damage, Vector2 center)
+        {
+            var dir = body.position - center;
+            body.AddForce(dir.normalized * (1000 / Mathf.Max(1, dir.magnitude)), ForceMode2D.Impulse);
+            health.Set(health - damage);
+        }
 
         public void Prepare()
         {

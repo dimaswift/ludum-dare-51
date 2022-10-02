@@ -10,5 +10,10 @@ namespace MobRoulette.Core.Behaviours
         {
             Destroy(gameObject);
         }
+
+        public void OnExplode(float maxRadius, int damage, Vector2 center)
+        {
+            
+        }
     }
 }

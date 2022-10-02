@@ -1,5 +1,4 @@
-﻿using System;
-using MobRoulette.Core.Domain;
+﻿using MobRoulette.Core.Domain;
 using MobRoulette.Core.Interfaces;
 using MobRoulette.Core.Utils;
 using UnityEngine;
@@ -8,18 +7,14 @@ namespace MobRoulette.Core.Behaviours
 {
     public class ProjectileBehaviour : MonoBehaviour, IProjectile
     {
-        public Color HitColor => hitColor;
         public int Damage { get; set; }
+        public IGun CurrentGun => currentGun;
         public Rigidbody2D Body => body;
         public int PrefabId { get; set; }
         public bool IsInUse { get; set; }
 
         [SerializeField] private int bounces;
 
-        [ColorUsage(true, true)]
-        [SerializeField] private Color hitColor;
-        
-        
         private Rigidbody2D body;
         private IHitTarget lastHit;
         private IGun currentGun;
@@ -27,24 +22,32 @@ namespace MobRoulette.Core.Behaviours
         private int bouncesLeft;
 
         private TrailRenderer trail;
-        private Vector2 trailStartPos;
+        private ParticleSystem effect;
+
         private float lifeTime;
 
         private float lastBounceTime;
+        
+        private IDefaultStateSaver[] positionSavers;
 
         public void OnDestroy()
         {
-            if (trail != null && trail.transform.parent != transform)
+            foreach (IDefaultStateSaver saver in positionSavers)
             {
-                Destroy(trail.gameObject);
+                saver.OnParentDestroyed();
             }
         }
 
         public void Init()
         {
+            positionSavers = GetComponentsInChildren<IDefaultStateSaver>();
+            foreach (IDefaultStateSaver positionSaver in positionSavers)
+            {
+                positionSaver.Save();
+            }
             trail = GetComponentInChildren<TrailRenderer>();
+            effect = GetComponentInChildren<ParticleSystem>();
             body = GetComponent<Rigidbody2D>();
-            trailStartPos = trail.transform.localPosition;
         }
         
         
@@ -73,7 +76,7 @@ namespace MobRoulette.Core.Behaviours
                 if (bouncesLeft <= 0)
                 {
                     Effects.Emit(EffectType.Spark, 5, contact.point, contact.normal);
-                    OnExplode();
+                    OnExplode(contact.normal);
                 }
                 return;
             }
@@ -85,12 +88,14 @@ namespace MobRoulette.Core.Behaviours
             {
                 Point = Body.position,
                 Impulse = contact.normalImpulse,
-                Normal = contact.normal
+                Normal = contact.normal,
+                ExtraDecalSize = currentGun.Config.IsExplosive ? currentGun.Config.ExplosionRadius : 1f,
+                ExtraDecalDuration = currentGun.Config.ExtraDecalDuration
             });
 
             if (bouncesLeft <= 0)
             {
-                OnExplode();
+                OnExplode(contact.normal);
             }
         }
         
@@ -113,6 +118,10 @@ namespace MobRoulette.Core.Behaviours
             {
                 trail.Clear();
             }
+            if (effect != null)
+            {
+                effect.Play();
+            }
         }
 
         private void Update()
@@ -122,9 +131,13 @@ namespace MobRoulette.Core.Behaviours
                 lifeTime -= Time.deltaTime;
                 if (lifeTime <= 0)
                 {
-                    Effects.Emit(EffectType.Spark, 3, transform.position, transform.forward);
-                    OnExplode();
+                    OnExplode(transform.forward);
                 }
+            }
+
+            if (!exploded && currentGun != null && currentGun.Config.ProjectileAcceleration > 0)
+            {
+                body.velocity += body.velocity.normalized * currentGun.Config.ProjectileAcceleration * Time.deltaTime;
             }
         }
 
@@ -134,13 +147,20 @@ namespace MobRoulette.Core.Behaviours
             Effects.Play(EffectType.Smoke, hitPoint.Point);
             currentGun.RegisterHit(this, hit, hitPoint);
             hit.OnHit(this, hitPoint);
+            
         }
 
-        public void OnExplode()
+        public void OnExplode(Vector2 normal)
         {
             if (exploded)
             {
                 return;
+            }
+
+            if (currentGun.Config.IsExplosive)
+            {
+                Effects.Play(currentGun.Config.ExplosionEffect, transform.position, normal);
+                Effects.Explode(transform.position, currentGun.Config.ExplosionRadius, currentGun.Config.Damage);
             }
 
             exploded = true;
@@ -148,23 +168,29 @@ namespace MobRoulette.Core.Behaviours
             {
                 trail.transform.SetParent(null);
             }
+            if (effect != null)
+            {
+                effect.transform.SetParent(null);
+            }
             Pool<ProjectileBehaviour>.Release(this);
         }
 
 
         public void Reuse()
         {
+            if (effect != null)
+            {
+                effect.Pause();
+            }
+            foreach (IDefaultStateSaver positionSaver in positionSavers)
+            {
+                positionSaver.Restore();
+            }
             exploded = false;
             bouncesLeft = bounces;
             body.velocity = Vector3.zero;
             body.angularVelocity = 0;
             lastHit = null;
-            if (trail != null)
-            {
-                var trailTransform = trail.transform;
-                trailTransform.SetParent(transform);
-                trailTransform.localPosition = trailStartPos;
-            }
         }
     }
 }

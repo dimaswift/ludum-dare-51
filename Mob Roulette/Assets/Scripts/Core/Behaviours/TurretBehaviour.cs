@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace MobRoulette.Core.Behaviours
 {
-    public class GunBehaviour : MonoBehaviour, IGun
+    public sealed class TurretBehaviour : MonoBehaviour, IGun
     {
         [SerializeField] private float minDistanceToShoot;
         [SerializeField] private Transform projectileSpawnPoint;
@@ -17,7 +17,8 @@ namespace MobRoulette.Core.Behaviours
         private float lastShotTime;
         private Vector2 targetPoint;
         private float currentAimAngle;
-        
+        public GunConfig Config => config;
+
         public bool TryShoot()
         {
             if (Time.time - lastShotTime < config.FireRate)
@@ -26,6 +27,7 @@ namespace MobRoulette.Core.Behaviours
             }
             var projectileBehaviour = Pool<ProjectileBehaviour>.GetFromPool(config.Projectile);
             projectileBehaviour.Shoot(this, projectileSpawnPoint.position, projectileSpawnPoint.up * config.ProjectileSpeed);
+            projectileBehaviour.transform.rotation = projectileSpawnPoint.rotation;
             lastShotTime = Time.time;
             EventBus.Raise<OnGunShot, (IProjectile, IGun)>((projectileBehaviour, this));
             return true;
@@ -36,7 +38,12 @@ namespace MobRoulette.Core.Behaviours
             targetPoint = target;
         }
 
-        protected virtual void Update()
+        public void SetEquipped(bool equipped)
+        {
+            gameObject.SetActive(equipped);
+        }
+
+        private void Update()
         {
             var distanceToTarget = Vector2.Distance(targetPoint, transform.position);
 
@@ -72,10 +79,7 @@ namespace MobRoulette.Core.Behaviours
             };
         }
 
-        public float CalculateDamage()
-        {
-            return config.Damage;
-        }
+       
     }
 }
 

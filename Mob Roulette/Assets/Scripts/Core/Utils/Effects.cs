@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using MobRoulette.Core.Domain;
+using MobRoulette.Core.Interfaces;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -9,9 +11,12 @@ namespace MobRoulette.Core.Utils
     {
         private static Dictionary<EffectType, ParticleSystem> effects = new();
 
+        private static Collider2D[] colliderBuffer = new Collider2D[32];
+         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void Init()
         {
+            colliderBuffer = new Collider2D[32];
             effects = new();
             root = null;
         }
@@ -51,6 +56,21 @@ namespace MobRoulette.Core.Utils
             transform.position = new Vector3(point.x, point.y, -9);
             transform.up = normal;
             effect.Emit(amount);
+        }
+        
+        public static void Explode(Vector2 point, float radius, int damage)
+        {
+            int collidersCount = Physics2D.OverlapCircleNonAlloc(point, radius, colliderBuffer);
+            for (int i = 0; i < collidersCount; i++)
+            {
+                var collider = colliderBuffer[i];
+                var hitTarget = collider.GetComponent<IHitTarget>();
+                if (hitTarget == null)
+                {
+                    continue;
+                }
+                hitTarget.OnExplode(radius, damage, point);
+            }
         }
 
         public static void Play(EffectType type, Vector2 point, Vector2 normal = default)
