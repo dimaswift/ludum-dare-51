@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MobRoulette.Core.Behaviours;
 using MobRoulette.Core.Interfaces;
 using UnityEngine;
@@ -10,6 +11,18 @@ namespace MobRoulette.Core.Utils
     {
         public static void Dispose()
         {
+            try
+            {
+                foreach (var pool in pools)
+                {
+                    pool.Value.DisposeAll();
+                }
+            }
+            catch (Exception e)
+            {
+                
+            }
+           
             pools = new();
         }
         
@@ -87,6 +100,7 @@ namespace MobRoulette.Core.Utils
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void DisposeAll()
         {
+            ReleaseAll();
             Pool<Decal>.Dispose();
             Pool<ProjectileBehaviour>.Dispose();
         }

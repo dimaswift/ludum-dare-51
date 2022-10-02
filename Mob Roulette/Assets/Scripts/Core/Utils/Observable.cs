@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using MobRoulette.Core.Interfaces;
 
 namespace MobRoulette.Core.Utils
@@ -9,8 +8,12 @@ namespace MobRoulette.Core.Utils
         private T value;
         public T Value => value;
         
-        public void Subscribe(Action<T> action)
+        public void Subscribe(Action<T> action, bool executeImmediately = false)
         {
+            if (executeImmediately)
+            {
+                action(value);
+            }
             OnChange += action;
         }
 
@@ -19,7 +22,7 @@ namespace MobRoulette.Core.Utils
             OnChange -= action;
         }
 
-        public event System.Action<T> OnChange = v => {};
+        public event Action<T> OnChange = v => {};
         
         public void Set(T newValue)
         {

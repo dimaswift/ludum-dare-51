@@ -4,6 +4,7 @@ using MobRoulette.Core.Interfaces;
 using MobRoulette.Core.Utils;
 using UnityEngine;
 using UnityEngine.Animations;
+using UnityEngine.EventSystems;
 
 namespace MobRoulette.Core.Behaviours
 {
@@ -12,18 +13,10 @@ namespace MobRoulette.Core.Behaviours
         [SerializeField] private FlyingBehaviour flyingBehaviour;
         [SerializeField] private Axis moveAxis = Axis.X;
         private Camera cam;
-        private int gunIndex;
-        private IGun[] guns;
-        
-        private readonly KeyCode[] gunKeys =
-        {
-            KeyCode.Alpha1, KeyCode.Alpha2, KeyCode.Alpha3, KeyCode.Alpha4, KeyCode.Alpha5
-        };
         
         private void Awake()
         {
             cam = Camera.main;
-            guns = GetComponentsInChildren<IGun>();
         }
 
         private void Update()
@@ -33,19 +26,6 @@ namespace MobRoulette.Core.Behaviours
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 Game.Instance.GoToMenu();
-            }
-            
-            for (int i = 0; i < guns.Length; i++)
-            {
-                if (Input.GetKeyDown(gunKeys[i]))
-                {
-                    if (gunIndex != i)
-                    {
-                        guns[gunIndex].SetEquipped(false);
-                        gunIndex = i;
-                        guns[gunIndex].SetEquipped(true);
-                    }
-                }
             }
             
             if (moveAxis.HasFlag(Axis.X))
@@ -76,24 +56,26 @@ namespace MobRoulette.Core.Behaviours
             }
             
             flyingBehaviour.Move(dir);
+            
+            IGun currentGun = Game.Instance.Player.CurrentGun;
+            
+            currentGun.Aim(cam.ScreenToWorldPoint(Input.mousePosition));
 
-            if(gunIndex < guns.Length)
+            if (Input.GetMouseButton(0))
             {
-                var currentGun = guns[gunIndex];
-
-                currentGun.Aim(cam.ScreenToWorldPoint(Input.mousePosition));
-
-                if (Input.GetMouseButton(0))
+                if (EventSystem.current.IsPointerOverGameObject())
                 {
-                    if (currentGun.TryShoot(out var projectile))
+                    return;
+                }
+                
+                if (currentGun.TryShoot(out var projectile))
+                {
+                    if (projectile.CurrentGun.Config.ProjectileAutoAimSpeed > 0)
                     {
-                        if (projectile.CurrentGun.Config.ProjectileAutoAimSpeed > 0)
+                        var closest = Game.Instance.WaveManager.FindClosestAliveMob(transform.position);
+                        if (closest != null)
                         {
-                            var closest = Game.Instance.MobSpawner.FindClosestAliveMob(transform.position);
-                            if (closest != null)
-                            {
-                                projectile.SetFollowTarget(closest.MainPart);
-                            }
+                            projectile.SetFollowTarget(closest.MainPart);
                         }
                     }
                 }

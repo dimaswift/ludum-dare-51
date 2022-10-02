@@ -93,6 +93,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4154292405799693237}
   - component: {fileID: 7279907322184585209}
+  - component: {fileID: 3496585179299404927}
   m_Layer: 7
   m_Name: RocketLauncher
   m_TagString: Untagged
@@ -129,11 +130,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8d8b7b8da0742742a574da50c07bf50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startAmmo: 10
   shootVolume: 0.5
   minDistanceToShoot: 0
   projectileSpawnPoint: {fileID: 7997110247087877952}
   config: {fileID: 11400000, guid: e1a444e97a072d3459cae7740ff1a7bf, type: 2}
   maxAngle: 0
+--- !u!114 &3496585179299404927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 573315307609548725}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45d9e5f80325415ab1130c95cc5e27e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ammoPrice: 100
+  unlockPrice: 1000
+  ammoBatchSize: 1
+  gunName: Rocket Launcher
+  unlockedByDefault: 0
 --- !u!1 &1234583844018526309
 GameObject:
   m_ObjectHideFlags: 0
@@ -227,8 +246,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1803794023784745347}
   - component: {fileID: 1803794023784745346}
+  - component: {fileID: 7773267331446505993}
   m_Layer: 7
-  m_Name: Turret
+  m_Name: Pistol
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -263,11 +283,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8d8b7b8da0742742a574da50c07bf50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startAmmo: 999999
   shootVolume: 0.5
   minDistanceToShoot: 0
   projectileSpawnPoint: {fileID: 1803794024554618846}
-  config: {fileID: 11400000, guid: d17a9e55ff8c314469b1c3ad272a3f75, type: 2}
+  config: {fileID: 11400000, guid: 543a611aa3a745d4fafd80afcf8f3782, type: 2}
   maxAngle: 0
+--- !u!114 &7773267331446505993
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1803794023784745372}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45d9e5f80325415ab1130c95cc5e27e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ammoPrice: 5
+  unlockPrice: 0
+  ammoBatchSize: 8
+  gunName: Pistol
+  unlockedByDefault: 1
 --- !u!1 &1803794024554618847
 GameObject:
   m_ObjectHideFlags: 0
@@ -419,6 +457,7 @@ Transform:
   - {fileID: 4154292405799693237}
   - {fileID: 1803794023784745347}
   - {fileID: 8771110260471892137}
+  - {fileID: 8679258222583066410}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -434,7 +473,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16ddd8c42ad442a69e8df06e2e1a4418, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 10
+  moveSpeed: 15
   drag: 0.151
 --- !u!50 &1803794024958210420
 Rigidbody2D:
@@ -593,6 +632,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8771110260471892137}
   - component: {fileID: 4859769646033851248}
+  - component: {fileID: 1255728099751785211}
   m_Layer: 7
   m_Name: MachineGun
   m_TagString: Untagged
@@ -629,11 +669,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8d8b7b8da0742742a574da50c07bf50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startAmmo: 500
   shootVolume: 0.5
   minDistanceToShoot: 0
   projectileSpawnPoint: {fileID: 4417262365753279845}
   config: {fileID: 11400000, guid: befba3433a8f8ae4ab9655309561231e, type: 2}
   maxAngle: 0
+--- !u!114 &1255728099751785211
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3791700423625916199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45d9e5f80325415ab1130c95cc5e27e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ammoPrice: 50
+  unlockPrice: 100
+  ammoBatchSize: 30
+  gunName: MachineGun
+  unlockedByDefault: 0
 --- !u!1 &4695870876525580881
 GameObject:
   m_ObjectHideFlags: 0
@@ -665,6 +723,120 @@ Transform:
   m_Father: {fileID: 4154292405799693237}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5532007858364877741
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8773410417236129939}
+  m_Layer: 7
+  m_Name: Gun
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8773410417236129939
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5532007858364877741}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.32, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8679258222583066410}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6120675373899370322
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 190414482783002319}
+  - component: {fileID: 5403653554456452629}
+  - component: {fileID: 848317731371342698}
+  m_Layer: 7
+  m_Name: Cylinder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &190414482783002319
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6120675373899370322}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.04, z: 0}
+  m_LocalScale: {x: 0.5, y: 0.5887, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8679258222583066410}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &5403653554456452629
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6120675373899370322}
+  m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &848317731371342698
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6120675373899370322}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &6897067251596458848
 GameObject:
   m_ObjectHideFlags: 0
@@ -696,3 +868,73 @@ Transform:
   m_Father: {fileID: 8771110260471892137}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8590489996643365421
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8679258222583066410}
+  - component: {fileID: 3307445612768501705}
+  - component: {fileID: 3547349227011818657}
+  m_Layer: 7
+  m_Name: SniperRifle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8679258222583066410
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8590489996643365421}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.46, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 190414482783002319}
+  - {fileID: 8773410417236129939}
+  m_Father: {fileID: 1803794024958210421}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3307445612768501705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8590489996643365421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8d8b7b8da0742742a574da50c07bf50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startAmmo: 10
+  shootVolume: 0.5
+  minDistanceToShoot: 0
+  projectileSpawnPoint: {fileID: 8773410417236129939}
+  config: {fileID: 11400000, guid: d17a9e55ff8c314469b1c3ad272a3f75, type: 2}
+  maxAngle: 0
+--- !u!114 &3547349227011818657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8590489996643365421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45d9e5f80325415ab1130c95cc5e27e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ammoPrice: 100
+  unlockPrice: 500
+  ammoBatchSize: 5
+  gunName: Sniper Rifle
+  unlockedByDefault: 0

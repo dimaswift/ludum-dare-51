@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2bbd8e33e00e4550b565ffaa583e57ad, type: 3}
-  m_Name: MachineGun
+  m_Name: Pistol
   m_EditorClassIdentifier: 
-  fireRate: 0.1
-  damage: 8
+  fireRate: 0.2
+  damage: 10
   aimSpeed: 30
   isExplosive: 0
   explosionRadius: 0
@@ -21,14 +21,14 @@ MonoBehaviour:
   hitEffect: 0
   decalType: 0
   shootSound: 6
-  hitEffectParticleCount: 5
+  hitEffectParticleCount: 10
   placeSmokeOnHit: 0
   extraDecalDuration: 0
   projectile: {fileID: 7977768274499272216, guid: 49076a9c474fb1542aa3219ef768c9ee,
     type: 3}
-  projectileSpeed: 70
+  projectileSpeed: 50
   projectileAcceleration: 0
-  projectileMaxSpeed: 70
+  projectileMaxSpeed: 50
   projectileAutoAimSpeed: 0
   explodeOnExpire: 0
   projectileLifetime: 5

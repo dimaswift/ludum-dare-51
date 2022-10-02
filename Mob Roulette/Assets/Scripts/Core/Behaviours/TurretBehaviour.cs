@@ -1,4 +1,3 @@
-using System.Collections;
 using MobRoulette.Core.Configs;
 using MobRoulette.Core.Domain;
 using MobRoulette.Core.Events;
@@ -10,6 +9,7 @@ namespace MobRoulette.Core.Behaviours
 {
     public sealed class TurretBehaviour : MonoBehaviour, IGun
     {
+        [SerializeField] private int startAmmo = int.MaxValue;
         [SerializeField] private float shootVolume = 0.5f;
         [SerializeField] private float minDistanceToShoot;
         [SerializeField] private Transform projectileSpawnPoint;
@@ -19,15 +19,40 @@ namespace MobRoulette.Core.Behaviours
         private Vector2 targetPoint;
         private float currentAimAngle;
         public GunConfig Config => config;
+        public IObservableValue<bool> Equipped => equipped;
+
+        private readonly Observable<bool> equipped = new(false);
+        public IObservableValue<int> Ammo => ammo;
+
+        private readonly Observable<int> ammo = new(0);
+
+        public void AddAmmo(int amount)
+        {
+            ammo.Set(ammo.Value + amount);
+        }
+
+        private void Start()
+        {
+            ammo.Set(startAmmo);
+        }
+
         public GameObject Owner { get; set; }
 
         public bool TryShoot(out IProjectile projectile)
         {
+            if (ammo.Value <= 0)
+            {
+                projectile = null;
+                return false;
+            }
+            
             if (Time.time - lastShotTime < config.FireRate)
             {
                 projectile = null;
                 return false;
             }
+            
+            ammo.Set(ammo.Value - 1);
             var projectileBehaviour = Pool<ProjectileBehaviour>.GetFromPool(config.Projectile);
             projectileBehaviour.Shoot(this, projectileSpawnPoint.position, projectileSpawnPoint.up * config.ProjectileSpeed);
             projectileBehaviour.transform.rotation = projectileSpawnPoint.rotation;
@@ -46,6 +71,7 @@ namespace MobRoulette.Core.Behaviours
         public void SetEquipped(bool equipped)
         {
             gameObject.SetActive(equipped);
+            this.equipped.Set(equipped);
         }
 
         private void Update()

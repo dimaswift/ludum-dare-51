@@ -12,5 +12,8 @@ namespace MobRoulette.Core.Interfaces
         void RegisterHit(IProjectile projectile, IHitTarget target, HitPoint hitPoint);
         ProjectileInfo GetProjectileInfo();
         GunConfig Config { get; }
+        public IObservableValue<bool> Equipped { get; }
+        IObservableValue<int> Ammo { get; }
+        void AddAmmo(int amount);
     }
 }

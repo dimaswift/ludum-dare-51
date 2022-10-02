@@ -10,7 +10,9 @@ namespace MobRoulette.Core.Behaviours
 {
     public class Mob : MonoBehaviour, IMob
     {
+        [SerializeField] private int killReward = 10;
         public MobPart MainPart => mainPart;
+        public int KillReward => killReward;
         public Vector2 Position => mainPart.Position;
         
         public event Action OnDestroyed = () => { };

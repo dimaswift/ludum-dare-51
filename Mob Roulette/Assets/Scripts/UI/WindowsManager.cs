@@ -41,6 +41,7 @@ namespace MobRoulette.UI
                 win.Init(this);
                 win.name = prefab.name;
                 win.Hide();
+                win.transform.localScale = Vector3.one;
                 windows[win.GetType()] = win;
             }
             Show<MainMenu>();

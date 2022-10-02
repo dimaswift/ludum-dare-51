@@ -9,5 +9,7 @@
         RocketLaunch,
         BigGunShot,
         SmallGunShot,
+        Error,
+        Purchase,
     }
 }
