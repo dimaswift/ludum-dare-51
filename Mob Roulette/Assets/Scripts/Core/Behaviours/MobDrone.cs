@@ -20,6 +20,13 @@ namespace MobRoulette.Core.Behaviours
 
         protected override void OnUpdate()
         {
+            if (mobPart.Deactivated || mobPart.IsOnFire)
+            {
+                mobPart.Body.drag = 0;
+                mobPart.Body.gravityScale = 1;
+                return;
+            }
+            
             var target = Game.Instance.Player.transform.position;
             var pos = transform.position;
             if (target.y > pos.y)

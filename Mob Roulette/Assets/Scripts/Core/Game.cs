@@ -106,7 +106,7 @@ namespace Core
                 Destroy(Player.gameObject);
                 Player = null;
             }
-            PoolDisposal.DisposeAll();
+            PoolDisposal.ReleaseAll();
         }
 
         public void GoToMenu()
