@@ -20,7 +20,7 @@ namespace MobRoulette.Core.Behaviours
 
         protected override void OnUpdate()
         {
-            if (mobPart.Deactivated)
+            if (mobPart.Deactivated || mobPart.IsOnFire)
             {
                 mobPart.Body.drag = 0;
                 mobPart.Body.gravityScale = 1;
