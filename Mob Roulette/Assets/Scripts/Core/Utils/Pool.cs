@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using MobRoulette.Core.Behaviours;
 using MobRoulette.Core.Interfaces;
 using UnityEngine;
-using UnityEngine.Pool;
+using Object = UnityEngine.Object;
 
 namespace MobRoulette.Core.Utils
 {
@@ -14,34 +13,27 @@ namespace MobRoulette.Core.Utils
             pools = new();
         }
         
-        private static Dictionary<int, (ObjectPool<T> pool, HashSet<T> items)> pools = new();
-    
+        private static Dictionary<int, CustomPool<T>> pools = new();
         
         public static T GetFromPool(T prefab)
         {
-            if (pools.ContainsKey(prefab.GetInstanceID()) == false)
+            if (pools.TryGetValue(prefab.GetInstanceID(), out var pool) == false)
             {
-                var set = new HashSet<T>();
-                var pool = new ObjectPool<T>(() =>
+                pool = new CustomPool<T>(() =>
                     {
                         var instance = Object.Instantiate(prefab.gameObject).GetComponent<T>();
                         instance.PrefabId = prefab.GetInstanceID();
                         instance.Init();
+                        instance.IsInUse = false;
+                        instance.gameObject.SetActive(false);
                         return instance;
-                    }, i=>
-                    {
-                        set.Add(i);
-                        OnCreate(i);
                     },
-                    i =>
-                    {
-                        set.Remove(i);
-                        OnCleanUp(i);
-                    },
+                    OnGet,
+                    OnCleanUp,
                     OnDestroy);
-                pools.Add(prefab.GetInstanceID(), (pool, set));
+                pools.Add(prefab.GetInstanceID(), pool);
             }
-            return pools[prefab.GetInstanceID()].pool.Get();
+            return pool.Get();
         }
 
         private static void OnDestroy(T obj)
@@ -54,10 +46,7 @@ namespace MobRoulette.Core.Utils
         {
             if (pools.TryGetValue(prefab.GetInstanceID(), out var pool))
             {
-                foreach (T item in pool.items.ToArray())
-                {
-                    pool.pool.Release(item);
-                }
+               pool.ReleaseAll();
             }
         }
 
@@ -65,10 +54,7 @@ namespace MobRoulette.Core.Utils
         {
             foreach (var data in pools)
             {
-                foreach (T item in data.Value.items.ToArray())
-                {
-                    data.Value.pool.Release(item);
-                }
+                data.Value.ReleaseAll();
             }
         }
         
@@ -76,17 +62,12 @@ namespace MobRoulette.Core.Utils
         {
             if (pools.TryGetValue(instance.PrefabId, out var pool))
             {
-                instance.transform.SetParent(null);
-                pool.pool.Release(instance);
+                pool.Release(instance);
             }
         }
 
-        private static void OnCreate(T obj)
+        private static void OnGet(T obj)
         {
-            if (obj == null)
-            {
-                return;
-            }
             obj.gameObject.SetActive(true);
             obj.Reuse();
             obj.IsInUse = true;
@@ -94,10 +75,7 @@ namespace MobRoulette.Core.Utils
 
         private static void OnCleanUp(T obj)
         {
-            if (obj == null || obj.IsInUse == false)
-            {
-                return;
-            }
+            obj.transform.SetParent(null);
             obj.IsInUse = false;
             obj.OnCleanUp();
             obj.gameObject.SetActive(false);

@@ -28,17 +28,20 @@ namespace MobRoulette.Core.Behaviours
             {
                 guns[i].SetEquipped(i == 0);
             }
+            health.Subscribe(h =>
+            {
+                if (h <= 0)
+                {
+                    Effects.Play(EffectType.Explosion, transform.position);
+                    Destroy(gameObject);
+                    Game.Instance.GameOver();
+                }
+            });
         }
 
         public void OnHit(IProjectile projectile, HitPoint hitPoint)
         {
             health.Set(health - projectile.CurrentGun.GetProjectileInfo().Damage);
-            if (health.Value <= 0)
-            {
-                Effects.Play(EffectType.Explosion, transform.position);
-                Destroy(gameObject);
-                Game.Instance.GameOver();
-            }
         }
 
         public void OnExplode(float maxRadius, int damage, Vector2 center)

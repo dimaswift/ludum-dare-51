@@ -5,10 +5,17 @@ namespace MobRoulette.Core.Behaviours
 {
     public abstract class MobBehaviour : MonoBehaviour
     {
-        private Mob mob;
+        protected Mob mob;
+        protected MobPart mobPart;
+        
 
         private void Awake()
         {
+            mobPart = GetComponent<MobPart>();
+            if (mobPart == null)
+            {
+                mobPart = GetComponentInParent<MobPart>();
+            }
             mob = GetComponentInParent<Mob>();
         }
 

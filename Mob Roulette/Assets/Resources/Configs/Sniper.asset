@@ -14,15 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fireRate: 0.5
   damage: 10
-  projectileSpeed: 80
   aimSpeed: 30
-  projectileLifetime: 5
-  projectile: {fileID: 7977768274499272216, guid: 49076a9c474fb1542aa3219ef768c9ee,
-    type: 3}
   isExplosive: 0
   explosionRadius: 0
-  explosionEffect: 3
-  decalType: 2
+  explosionEffect: 2
+  hitEffect: 3
+  decalType: 0
   shootSound: 5
+  hitEffectParticleCount: 50
+  placeSmokeOnHit: 1
+  extraDecalDuration: 3
+  projectile: {fileID: 7977768274499272216, guid: 49076a9c474fb1542aa3219ef768c9ee,
+    type: 3}
+  projectileSpeed: 80
   projectileAcceleration: 0
-  extraDecalDuration: 0
+  projectileMaxSpeed: 80
+  projectileAutoAimSpeed: 0
+  explodeOnExpire: 0
+  projectileLifetime: 5

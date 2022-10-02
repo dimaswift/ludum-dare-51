@@ -30,6 +30,11 @@ namespace MobRoulette.Core.Behaviours
         {
             Vector2 dir = Vector2.zero;
 
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                Game.Instance.GoToMenu();
+            }
+            
             for (int i = 0; i < guns.Length; i++)
             {
                 if (Input.GetKeyDown(gunKeys[i]))

@@ -11,9 +11,7 @@ namespace MobRoulette.Core.Behaviours
     public class Mob : MonoBehaviour, IMob
     {
         public MobPart MainPart => mainPart;
-        public Vector2 Position => mainPart != null 
-                ? mainPart.transform.position : parts.Count > 0 
-                ? parts[0].transform.position : transform.position;
+        public Vector2 Position => mainPart.Position;
         
         public event Action OnDestroyed = () => { };
         public bool IsDead { get; private set; }
@@ -26,7 +24,7 @@ namespace MobRoulette.Core.Behaviours
             GetComponentsInChildren(parts);
             foreach (MobPart part in parts)
             {
-                part.OnBeforeKilled += OnPartKilled;
+                part.OnDeactivate += OnPartDeactivate;
                 if (part.IsMain)
                 {
                     mainPart = part;
@@ -39,17 +37,10 @@ namespace MobRoulette.Core.Behaviours
             OnDestroyed();
         }
 
-        private void OnPartKilled(MobPart part)
+        private void OnPartDeactivate(MobPart part)
         {
             if (IsDead)
             {
-                return;
-            }
-            parts.Remove(part);
-            if (parts.Count == 0)
-            {
-                IsDead = true;
-                Destroy(gameObject);
                 return;
             }
             if (!part.IsMain)
@@ -60,19 +51,18 @@ namespace MobRoulette.Core.Behaviours
             for (var i = parts.Count - 1; i >= 0; i--)
             {
                 var other = parts[i];
-                if (other == part)
+                if (other == part || other.Exploded)
                 {
                     continue;
                 }
-                other.OnBeforeKilled -= OnPartKilled;
-                other.Kill();
+                other.OnDeactivate -= OnPartDeactivate;
                 var dir = other.transform.position - part.transform.position;
                 other.AttachPermanentDecal(DecalType.SmallFire, 1);
                 other.Body.velocity = new Vector2(Mathf.Sign(dir.x) * Random.Range(5f, 10f), Random.Range(10f, 20f));
                 other.Body.AddTorque(Random.Range(-1000f, 1000f), ForceMode2D.Impulse);
-                TimerUtils.Delay(Random.Range(3f, 6f), () => other.Explode());
+                parts.RemoveAt(i);
+                other.Deactivate(Random.Range(3f, 6f));
             }
-
             Destroy(gameObject);
         }
     }

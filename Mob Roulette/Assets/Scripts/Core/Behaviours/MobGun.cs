@@ -8,17 +8,23 @@ namespace MobRoulette.Core.Behaviours
     {
         [SerializeField] private bool followPlayer;
         private IGun gun;
-        
+
         private void Start()
         {
             gun = GetComponent<IGun>();
-            delay = Random.Range(0f, 1f);
+            delay = Random.Range(5f, 5f);
         }
 
         private float delay;
 
         protected override void OnUpdate()
         {
+            if (mobPart.Deactivated || mobPart.IsOnFire)
+            {
+                gun.Aim(Vector2.zero);
+                return;
+            }
+            
             if (delay > 0)
             {
                 delay -= Time.deltaTime;

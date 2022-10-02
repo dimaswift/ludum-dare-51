@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Core;
 using MobRoulette.Core.Utils;
 using UnityEngine;
@@ -10,6 +11,7 @@ namespace MobRoulette.Core.Behaviours
     {
         public IEnumerable<Mob> SpawnedMobs => spawnedMobs;
 
+        [SerializeField] private bool randomizeOrder;
         [SerializeField] private Mob[] prefabs;
         [SerializeField] private float spawnRate = 10;
 
@@ -20,8 +22,9 @@ namespace MobRoulette.Core.Behaviours
 
         private int lastSpawnPointIndex;
         private Transform[] spawnPoints;
+        private int lastMobIndex;
         
-        private readonly List<Mob> spawnedMobs = new ();
+        private readonly HashSet<Mob> spawnedMobs = new ();
 
         public Mob FindClosestAliveMob(Vector2 point)
         {
@@ -46,22 +49,11 @@ namespace MobRoulette.Core.Behaviours
         private void Awake()
         {
             spawnPoints = GetComponentsInChildren<Transform>();
-            currentSpawnRate = spawnRate;
             Game.Instance.State.Subscribe(s =>
             {
-                if (s == GameState.Playing)
+                if (s == GameState.Playing || s == GameState.MainMenu)
                 {
-                    foreach (Mob mob in spawnedMobs)
-                    {
-                        if (mob != null)
-                        {
-                            Destroy(mob.gameObject);
-                        }
-                    }
-                    spawnedMobs.Clear();
-                    lastSpawn = -currentSpawnRate;
-                    currentSpawnRate = spawnRate;
-                    wave = 1;
+                    CleanUp();
                 }
             });
         }
@@ -77,32 +69,56 @@ namespace MobRoulette.Core.Behaviours
             
             if (Time.time - lastSpawn >= currentSpawnRate)
             {
-
-                if (spawnedMobs.Count > 3)
-                {
-                    return;
-                }
-                
+               
                 lastSpawn = Time.time;
                 for (int i = 0; i < wave; i++)
                 {
-                   
-                    var pointIndex = Random.Range(0, spawnPoints.Length);
-                    while (pointIndex == lastSpawnPointIndex)
+                    if (spawnedMobs.Count >= 3)
                     {
-                        pointIndex = Random.Range(0, spawnPoints.Length);
+                        continue;
                     }
-                    lastSpawnPointIndex = pointIndex;
-                    var point = spawnPoints[pointIndex];
-                    var mob = Instantiate(prefabs[Random.Range(0, prefabs.Length)].gameObject).GetComponent<Mob>();
+
+                    var point = spawnPoints[lastSpawnPointIndex];
+                    
+                    var index = randomizeOrder ? Random.Range(0, prefabs.Length) : lastMobIndex;
+                    lastMobIndex++;
+                    if(lastMobIndex >= prefabs.Length)
+                    {
+                        lastMobIndex = 0;
+                    }
+                    var mob = Instantiate(prefabs[index].gameObject).GetComponent<Mob>();
                     mob.transform.position = point.position;
                     mob.transform.rotation = Quaternion.identity;
-                    mob.OnDestroyed += () => spawnedMobs.Remove(mob);
+                    mob.OnDestroyed += () =>
+                    {
+                        spawnedMobs.Remove(mob);
+                    };
                     spawnedMobs.Add(mob);
+
+                    lastSpawnPointIndex++;
+                  
+                    if(lastSpawnPointIndex >= spawnPoints.Length)
+                    {
+                        lastSpawnPointIndex = 0;
+                    }
+                    
                 }
 
                 wave = Mathf.Min(3, wave + 1);
             }
+        }
+
+        public void CleanUp()
+        {
+            wave = 1;
+            lastSpawn = -spawnRate;
+            currentSpawnRate = spawnRate;
+            lastSpawnPointIndex = 0;
+            foreach (Mob mob in spawnedMobs)
+            {
+                Destroy(mob.gameObject);
+            }
+            spawnedMobs.Clear();
         }
     }
 }

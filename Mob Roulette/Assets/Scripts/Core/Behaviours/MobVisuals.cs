@@ -15,12 +15,18 @@ namespace MobRoulette.Core.Behaviours
         private void Awake()
         {
             damageDecal = GetComponentInChildren<DamageDecal>();
-            damageDecal.SetSize(transform.localScale);
+            if (damageDecal != null)
+            {
+                damageDecal.SetSize(transform.localScale / 10);
+            }
         }
 
         public void SetDamaged(float damagePercent)
         {
-            damageDecal.SetDamaged(damagePercent);
+            if (damageDecal != null)
+            {
+                damageDecal.SetDamaged(damagePercent);
+            }
         }
         
         public void Explode()

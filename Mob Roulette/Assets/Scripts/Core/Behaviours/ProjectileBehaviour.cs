@@ -7,6 +7,7 @@ namespace MobRoulette.Core.Behaviours
 {
     public class ProjectileBehaviour : MonoBehaviour, IProjectile
     {
+        [SerializeField] private float disableColliderAfterShotSeconds;
         [SerializeField] private int bounces;
         public int Damage { get; set; }
         public IGun CurrentGun => currentGun;
@@ -28,10 +29,15 @@ namespace MobRoulette.Core.Behaviours
         private float lifeTime;
         private bool expired;
         private float lastBounceTime;
+        private float afterExpirationTimer;
         
         private IDefaultStateSaver[] positionSavers;
         private IRocketTarget followTarget;
         private float currentAimAcceleration;
+        private float defaultGravityScale;
+
+        private Collider2D coll;
+        private float timeTillColliderEnabled;
 
         public void SetFollowTarget(IRocketTarget target)
         {
@@ -49,6 +55,7 @@ namespace MobRoulette.Core.Behaviours
 
         public void Init()
         {
+            coll = GetComponent<Collider2D>();
             positionSavers = GetComponentsInChildren<IDefaultStateSaver>();
             foreach (IDefaultStateSaver positionSaver in positionSavers)
             {
@@ -57,6 +64,7 @@ namespace MobRoulette.Core.Behaviours
             trail = GetComponentInChildren<TrailRenderer>();
             effect = GetComponentInChildren<ParticleSystem>();
             body = GetComponent<Rigidbody2D>();
+            defaultGravityScale = body.gravityScale;
         }
         
         
@@ -89,6 +97,7 @@ namespace MobRoulette.Core.Behaviours
                 }
                 return;
             }
+            
 
             lastHit = target;
 
@@ -117,12 +126,14 @@ namespace MobRoulette.Core.Behaviours
       
         public void Shoot(IGun gun, Vector2 point, Vector2 velocity)
         {
+            body.gravityScale = defaultGravityScale;
             currentGun = gun;
             var info = currentGun.GetProjectileInfo();
             lifeTime = info.Lifetime;
             Damage = info.Damage;
             transform.position = new Vector3(point.x,point.y, -1);
             body.velocity = velocity;
+            bouncesLeft = bounces;
             if (trail != null)
             {
                 trail.Clear();
@@ -130,6 +141,12 @@ namespace MobRoulette.Core.Behaviours
             if (effect != null)
             {
                 effect.Play();
+            }
+
+            if (disableColliderAfterShotSeconds > 0)
+            {
+                timeTillColliderEnabled = disableColliderAfterShotSeconds;
+                coll.enabled = false;
             }
         }
 
@@ -182,17 +199,32 @@ namespace MobRoulette.Core.Behaviours
 
         private void ProcessExpiration()
         {
-            if (expired || exploded)
+            if (exploded)
             {
                 return;
             }
+
+            if (expired)
+            {
+                afterExpirationTimer -= Time.deltaTime;
+                if (afterExpirationTimer < 0)
+                {
+                    exploded = true;
+                    DetachEffects();
+                    Pool<ProjectileBehaviour>.Release(this);
+                }
+                return;
+            }
+            
             lifeTime -= Time.deltaTime;
+            
             if (lifeTime > 0)
             {
                 return;
             }
 
             expired = true;
+            
             if (currentGun.Config.ExplodeOnExpire)
             {
                 OnExplode(transform.forward);
@@ -205,6 +237,20 @@ namespace MobRoulette.Core.Behaviours
         
         private void Update()
         {
+            if (timeTillColliderEnabled > 0)
+            {
+                timeTillColliderEnabled -= Time.deltaTime;
+                if (timeTillColliderEnabled <= 0)
+                {
+                    coll.enabled = true;
+                }
+            }
+            
+            if (currentGun == null)
+            {
+                return;
+            }
+            
             ProcessExpiration();
             ProcessAutoFollow();
             ProcessAcceleration();
@@ -213,8 +259,11 @@ namespace MobRoulette.Core.Behaviours
 
         public void OnHit(IHitTarget hit, HitPoint hitPoint)
         {
-            Effects.Emit(EffectType.Spark, 30, hitPoint.Point, hitPoint.Normal);
-            Effects.Play(EffectType.Smoke, hitPoint.Point);
+            Effects.Emit(currentGun.Config.HitEffect, currentGun.Config.HitEffectParticleCount, hitPoint.Point, hitPoint.Normal);
+            if (currentGun.Config.PlaceSmokeOnHit)
+            {
+                Effects.Play(EffectType.Smoke, hitPoint.Point);
+            }
             currentGun.RegisterHit(this, hit, hitPoint);
             hit.OnHit(this, hitPoint);
         }
@@ -247,13 +296,13 @@ namespace MobRoulette.Core.Behaviours
 
             DetachEffects();
             exploded = true;
-            
             Pool<ProjectileBehaviour>.Release(this);
         }
 
 
         public void Reuse()
         {
+            afterExpirationTimer = 10;
             expired = false;
             currentAimAcceleration = 0;
             followTarget = null;

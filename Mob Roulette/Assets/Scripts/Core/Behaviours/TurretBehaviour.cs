@@ -19,6 +19,7 @@ namespace MobRoulette.Core.Behaviours
         private Vector2 targetPoint;
         private float currentAimAngle;
         public GunConfig Config => config;
+        public GameObject Owner { get; set; }
 
         public bool TryShoot(out IProjectile projectile)
         {
@@ -49,6 +50,9 @@ namespace MobRoulette.Core.Behaviours
 
         private void Update()
         {
+            if (targetPoint == Vector2.zero)
+                return;
+            
             var distanceToTarget = Vector2.Distance(targetPoint, transform.position);
 
             if (minDistanceToShoot > 0 && distanceToTarget > minDistanceToShoot)

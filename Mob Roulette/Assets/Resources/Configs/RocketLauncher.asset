@@ -13,16 +13,22 @@ MonoBehaviour:
   m_Name: RocketLauncher
   m_EditorClassIdentifier: 
   fireRate: 1
-  damage: 15
-  projectileSpeed: 5
+  damage: 30
   aimSpeed: 50
-  projectileLifetime: 10
-  projectile: {fileID: 7977768274499272216, guid: d96e6e7f3eb58bc4ea945d5676d75cc3,
-    type: 3}
   isExplosive: 1
   explosionRadius: 7
   explosionEffect: 2
+  hitEffect: 1
   decalType: 2
   shootSound: 4
-  projectileAcceleration: 20
+  hitEffectParticleCount: 0
+  placeSmokeOnHit: 0
   extraDecalDuration: 3
+  projectile: {fileID: 7977768274499272216, guid: d96e6e7f3eb58bc4ea945d5676d75cc3,
+    type: 3}
+  projectileSpeed: 5
+  projectileAcceleration: 20
+  projectileMaxSpeed: 100
+  projectileAutoAimSpeed: 5
+  explodeOnExpire: 0
+  projectileLifetime: 10

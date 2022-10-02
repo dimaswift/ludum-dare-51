@@ -10,9 +10,11 @@ namespace MobRoulette.Core.Behaviours
 {
     public class MobPart : MonoBehaviour, IHitTarget, IRocketTarget
     {
+        public bool Exploded => exploded;
         public bool ShouldFollow => !Deactivated;
         public Vector2 Position => body.position;
-        public event Action<MobPart> OnBeforeKilled = m => { };
+        public event Action<MobPart> OnDeactivate = m => { };
+        public event Action<DecalType> OnDecalAttached = d => { };
         public Rigidbody2D Body => body;
         public bool Deactivated { get; private set; }
         public bool IsOnFire => permanentDecals.ContainsKey(DecalType.SmallFire);
@@ -25,6 +27,7 @@ namespace MobRoulette.Core.Behaviours
         [SerializeField] private bool isMainPart;
         [SerializeField] private int maxHealth = 10;
         [SerializeField] private Transform firePosition;
+        [SerializeField] private float dealDamageIfOnFireRate;
         
         public int PrefabId { get; set; }
         public bool IsInUse { get; set; }
@@ -37,6 +40,8 @@ namespace MobRoulette.Core.Behaviours
         private readonly List<Decal> addedDecals = new();
         private Joint2D[] joints;
         private float decalPositionZ;
+        private float lastHealthFireDrainTime;
+        private float explodeDelay;
 
         private readonly Dictionary<DecalType, Decal> permanentDecals = new ();
 
@@ -63,6 +68,26 @@ namespace MobRoulette.Core.Behaviours
             health = maxHealth;
         }
 
+        private void Update()
+        {
+            if (Deactivated && !exploded)
+            {
+                explodeDelay -= Time.deltaTime;
+                if (explodeDelay <= 0)
+                {
+                    Explode();
+                }
+            }
+
+            if (dealDamageIfOnFireRate > 0 && IsOnFire)
+            {
+                if (Time.time - lastHealthFireDrainTime >= dealDamageIfOnFireRate)
+                {
+                    DealDamage(1);
+                    lastHealthFireDrainTime = Time.time;
+                }
+            }
+        }
 
         private void DealDamage(int damage)
         {
@@ -88,11 +113,22 @@ namespace MobRoulette.Core.Behaviours
             
             if (health <= maxHealth / 2f && !IsSmoking)
             {
-               
                 AttachPermanentDecal(DecalType.Smoke, 3);
             }
         }
-        
+
+        private void OnCollisionEnter2D(Collision2D collision)
+        {
+            if (exploded)
+            {
+                return;
+            }
+            if (IsOnFire && collision.relativeVelocity.magnitude > 20
+                         && collision.gameObject.GetComponent<IProjectile>() == null)
+            {
+                Explode();
+            }
+        }
         
         public void OnHit(IProjectile projectile, HitPoint hitPoint)
         {
@@ -137,13 +173,18 @@ namespace MobRoulette.Core.Behaviours
             {
                 return;
             }
+            
             exploded = true;
-            Kill();
+            
+            Deactivate(0);
+            
             foreach (MobVisuals visuals in mobVisuals)
             {
                 visuals.Explode();
             }
+            
             Effects.Play(explosionEffect, transform.position);
+            
             foreach (Decal decal in addedDecals)
             {
                 if (!decal.IsInUse || decal == null)
@@ -166,6 +207,11 @@ namespace MobRoulette.Core.Behaviours
 
         public void AttachPermanentDecal(DecalType type, float size)
         {
+            if (exploded)
+            {
+                return;
+            }
+            
             if (permanentDecals.ContainsKey(type))
             {
                 return;
@@ -179,6 +225,7 @@ namespace MobRoulette.Core.Behaviours
                     Duration = -1,
                     Size = size
                 });
+            OnDecalAttached(type);
         }
 
         public void DetachPermanentDecal(DecalType type)
@@ -192,19 +239,20 @@ namespace MobRoulette.Core.Behaviours
             permanentDecals.Remove(type);
         }
         
-        public void Kill()
+        public void Deactivate(float explodeDelay)
         {
             if (Deactivated)
             {
                 return;
             }
+            this.explodeDelay = explodeDelay;
             transform.SetParent(null);
             Deactivated = true;
-            OnBeforeKilled(this);
             foreach (Joint2D joint in joints)
             {
                 Destroy(joint);
             }
+            OnDeactivate(this);
         }
 
     }
